@@ -1,0 +1,19 @@
+{
+  "jsc": {
+    "parser": {
+      "syntax": "ecmascript",
+      "jsx": true
+    },
+    "transform": {
+      "react": {
+        "runtime": "automatic",
+        "development": false
+      }
+    },
+    "target": "es2021"
+  },
+  "module": {
+    "type": "es6"
+  },
+  "sourceMaps": false
+}

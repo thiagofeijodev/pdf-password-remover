@@ -1,0 +1,19 @@
+{
+  "short_name": "PDF Remover",
+  "name": "PDF Password Remover",
+  "description": "Remove password from PDF files",
+  "start_url": "/index.html",
+  "scope": "/",
+  "dir": "ltr",
+  "display_override": ["window-control-overlay", "minimal-ui"],
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "categories": ["business", "productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Home",
+      "url": "/"
+    }
+  ]
+}

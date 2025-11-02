@@ -1,0 +1,17 @@
+{
+  "editor.formatOnSave": true,
+
+  // Use the ESLint flat config API
+  "eslint.useFlatConfig": true,
+
+  // Validate JS and JSX files
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+
+  // Try to automatically fix problems on save
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "always"
+  },
+
+  // Ensure the extension looks in workspace node_modules
+  "eslint.nodePath": "./node_modules"
+}

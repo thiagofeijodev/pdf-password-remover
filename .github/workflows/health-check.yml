@@ -1,0 +1,60 @@
+name: Daily Health Check
+
+on:
+  schedule:
+    # Runs every day at 9:00 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  health-check:
+    name: Check if app is up and working
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Health Check
+        run: |
+          APP_URL="https://thiagofeijodev.github.io/countdown/"
+
+          echo "🔍 Checking if app is accessible..."
+
+          # Check HTTP status and response
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL" || echo "000")
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "❌ Health check failed! HTTP Status: $HTTP_STATUS"
+            echo "Expected: 200, Got: $HTTP_STATUS"
+            exit 1
+          fi
+
+          echo "✅ HTTP Status: $HTTP_STATUS"
+
+          # Check if page contains expected content (countdown related)
+          echo "🔍 Verifying page content..."
+          RESPONSE=$(curl -s -L "$APP_URL")
+
+          if [ -z "$RESPONSE" ]; then
+            echo "❌ Health check failed! Page appears to be empty"
+            exit 1
+          fi
+
+          # Check for basic HTML structure and React content
+          if echo "$RESPONSE" | grep -q "<!doctype html\|<html\|<div\|countdown" -i; then
+            echo "✅ Page content verified"
+          else
+            echo "⚠️  Warning: Page structure might be unexpected"
+          fi
+
+          # Check if main JavaScript bundle is accessible
+          echo "🔍 Checking JavaScript bundle..."
+          if echo "$RESPONSE" | grep -q "\.js\|service-worker" -i; then
+            echo "✅ JavaScript assets detected"
+          else
+            echo "⚠️  Warning: JavaScript assets might not be loaded"
+          fi
+
+          echo ""
+          echo "✅ Health check passed! App is up and running."
+
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
