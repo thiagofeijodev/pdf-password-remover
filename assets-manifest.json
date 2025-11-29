@@ -75,7 +75,7 @@
   "index.html.gz": "index.html.gz",
   "logo.png": "logo.png",
   "main.css": "static/main.32bb86d737a50c12.css",
-  "main.js": "static/main.503941b45215464e.js",
+  "main.js": "static/main.ad82133189cb95e4.js",
   "service-worker.js": "service-worker.js",
   "service-worker.js.gz": "service-worker.js.gz",
   "static/325.b1f1ce09e96efca1.js": "static/325.b1f1ce09e96efca1.js",
@@ -87,7 +87,7 @@
   "static/980.57384fb704cc3d46.js": "static/980.57384fb704cc3d46.js",
   "static/980.57384fb704cc3d46.js.gz": "static/980.57384fb704cc3d46.js.gz",
   "static/main.32bb86d737a50c12.css.gz": "static/main.32bb86d737a50c12.css.gz",
-  "static/main.503941b45215464e.js.gz": "static/main.503941b45215464e.js.gz",
+  "static/main.ad82133189cb95e4.js.gz": "static/main.ad82133189cb95e4.js.gz",
   "workbox-915e8d08.js": "workbox-915e8d08.js",
   "workbox-915e8d08.js.gz": "workbox-915e8d08.js.gz"
 }
