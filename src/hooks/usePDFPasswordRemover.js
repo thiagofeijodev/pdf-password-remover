@@ -14,7 +14,7 @@ const STORAGE_KEY = 'pdfPasswordRemover_data';
 
 async function renderAllPagesToCanvas(pdfDocument) {
   const numPages = pdfDocument.numPages;
-  const pdf = new jsPDF();
+  let pdf = null;
 
   // Render each page and add to PDF
   for (let pageNum = 1; pageNum <= numPages; pageNum++) {
@@ -35,14 +35,20 @@ async function renderAllPagesToCanvas(pdfDocument) {
 
     // Convert canvas to image and add to PDF
     const imgData = canvas.toDataURL('image/png');
-    const imgWidth = pdf.internal.pageSize.getWidth();
-    const imgHeight = (viewport.height * imgWidth) / viewport.width;
+    const pageWidth = viewport.width;
+    const pageHeight = viewport.height;
 
     if (pageNum === 1) {
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      // Initialize jsPDF with the dimensions of the first page
+      pdf = new jsPDF({
+        unit: 'px',
+        format: [pageWidth, pageHeight],
+      });
+      pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
     } else {
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      // Add a new page with the same dimensions
+      pdf.addPage([pageWidth, pageHeight]);
+      pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
     }
   }
 
