@@ -41,6 +41,7 @@ async function renderAllPagesToCanvas(pdfDocument) {
     if (pageNum === 1) {
       // Initialize jsPDF with the dimensions of the first page
       pdf = new jsPDF({
+        orientation: pageWidth > pageHeight ? 'landscape' : 'portrait',
         unit: 'px',
         format: [pageWidth, pageHeight],
       });
