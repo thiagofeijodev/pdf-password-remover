@@ -1,60 +1,9 @@
 import { useState, useEffect } from 'react';
-import * as pdfjsLib from 'pdfjs-dist';
-import jsPDF from 'jspdf';
-
-// Set up PDF.js worker
-// Use the actual installed version from pdfjsLib.version
-if (typeof window !== 'undefined') {
-  // PDF.js 4.x uses .mjs files - use jsdelivr CDN which is reliable
-  const pdfjsVersion = pdfjsLib.version;
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsVersion}/build/pdf.worker.min.mjs`;
-}
+import { createPDFObject } from '../utils/createPDFObject';
+import { toPDFDocument } from '../utils/toPDFDocument';
+import { downloadBlob } from '../utils/downloadBlob';
 
 const STORAGE_KEY = 'pdfPasswordRemover_data';
-
-async function renderAllPagesToCanvas(pdfDocument) {
-  const numPages = pdfDocument.numPages;
-  let pdf = null;
-
-  // Render each page and add to PDF
-  for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-    const page = await pdfDocument.getPage(pageNum);
-    const viewport = page.getViewport({ scale: 2 }); // Higher scale for better quality
-
-    // Create a temporary canvas for rendering
-    const canvas = document.createElement('canvas');
-    const canvasContext = canvas.getContext('2d');
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
-
-    // Render the PDF page to canvas
-    await page.render({
-      canvasContext,
-      viewport,
-    }).promise;
-
-    // Convert canvas to image and add to PDF
-    const imgData = canvas.toDataURL('image/png');
-    const pageWidth = viewport.width;
-    const pageHeight = viewport.height;
-
-    if (pageNum === 1) {
-      // Initialize jsPDF with the dimensions of the first page
-      pdf = new jsPDF({
-        orientation: pageWidth > pageHeight ? 'landscape' : 'portrait',
-        unit: 'px',
-        format: [pageWidth, pageHeight],
-      });
-      pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
-    } else {
-      // Add a new page with the same dimensions
-      pdf.addPage([pageWidth, pageHeight]);
-      pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
-    }
-  }
-
-  return pdf;
-}
 
 export const usePDFPasswordRemover = () => {
   const [file, setFile] = useState(null);
@@ -63,7 +12,7 @@ export const usePDFPasswordRemover = () => {
   const [error, setError] = useState('');
   const [fileName, setFileName] = useState('');
 
-  // Load saved data from localStorage on mount
+  // Load last used password from localStorage on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -121,41 +70,14 @@ export const usePDFPasswordRemover = () => {
     setError('');
 
     try {
-      const arrayBuffer = await file.arrayBuffer();
+      // create PDF.js document object with password
+      const pdfDocument = await createPDFObject(file, password);
 
-      // Create copies of the ArrayBuffer immediately to avoid detached buffer issues
-      // PDF.js may transfer/detach buffers, so we work with copies from the start
-      const bufferForPdfJs = arrayBuffer.slice(0);
+      // convert PDF to new PDF without password
+      const newPdf = await toPDFDocument(pdfDocument);
 
-      // Load PDF with password using PDF.js
-      const loadingTask = pdfjsLib.getDocument({
-        password: password,
-        data: bufferForPdfJs,
-      });
-
-      const pdfDocument = await loadingTask.promise;
-
-      // Render all pages to canvas and create new PDF
-      const newPdf = await renderAllPagesToCanvas(pdfDocument);
-
-      // Generate blob from the new PDF
-      const pdfBlob = newPdf.output('blob');
-
-      // Create download link
-      const url = URL.createObjectURL(pdfBlob);
-      const a = document.createElement('a');
-      a.href = url;
-
-      // Use original filename with _unlocked suffix
-      const originalName = fileName.replace(/\.pdf$/i, '');
-      a.download = `${originalName}_unlocked.pdf`;
-
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      // Clean up
-      URL.revokeObjectURL(url);
+      // download the new PDF without password
+      downloadBlob(newPdf, fileName);
 
       setIsProcessing(false);
     } catch (err) {
