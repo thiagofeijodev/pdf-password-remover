@@ -6,7 +6,6 @@
     "npm": "11.6.0",
     "node": "24.9.0"
   },
-  "type": "module",
   "scripts": {
     "start": "node .config/rspack/rspack.dev.mjs",
     "build": "rspack --config .config/rspack/rspack.prod.mjs",
