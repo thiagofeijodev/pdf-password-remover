@@ -1,0 +1,58 @@
+name: Full Build & Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [24.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Emscripten
+        run: |
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          ./emsdk install latest
+          ./emsdk activate latest
+          source ./emsdk_env.sh
+          cd ..
+
+      - name: Install CMake
+        run: sudo apt-get update && sudo apt-get install -y cmake
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build WASM module
+        run: |
+          source emsdk/emsdk_env.sh
+          npm run build:wasm
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build application
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: build/
+          retention-days: 30

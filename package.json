@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node .config/rspack/rspack.dev.mjs",
     "build": "rspack --config .config/rspack/rspack.prod.mjs",
+    "build:wasm": "cd src/wasm && emcmake cmake -B build_wasm && cmake --build build_wasm && cp build_wasm/pdf-remover.* ../../build/",
     "analyzer": "rspack build --analyze --mode development --config .config/rspack/rspack.prod.mjs",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import * as styles from './App.module.css';
-import { usePDFPasswordRemover } from './hooks/usePDFPasswordRemover';
+import { useWasmPDFRemover } from './hooks/useWasmPDFRemover';
 import { createGoogleTag } from './utils/createGoogleTag';
 
 const App = () => {
@@ -13,7 +13,7 @@ const App = () => {
     handleFileChange,
     handlePasswordChange,
     handleRemovePassword,
-  } = usePDFPasswordRemover();
+  } = useWasmPDFRemover();
 
   useEffect(() => {
     createGoogleTag();

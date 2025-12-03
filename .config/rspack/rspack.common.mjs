@@ -1,3 +1,4 @@
+import { rspack } from '@rspack/core';
 import path from 'path';
 
 export default {
@@ -61,4 +62,9 @@ export default {
   experiments: {
     css: true,
   },
+  plugins: [
+    new rspack.CopyRspackPlugin({
+      patterns: [{ from: 'public/pdf-remover.wasm' }, { from: 'public/pdf-remover.js' }],
+    }),
+  ],
 };
