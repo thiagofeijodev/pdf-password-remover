@@ -146,6 +146,7 @@ const config = [
       '**/.cache/**',
       '**/bun.lock',
       '**/package-lock.json',
+      '**/pdf-remover.js',
     ],
   },
 ];
