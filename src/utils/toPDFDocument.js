@@ -41,5 +41,5 @@ export async function toPDFDocument(pdfDocument) {
     }
   }
 
-  return pdf;
+  return pdf.output('blob');
 }

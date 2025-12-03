@@ -26,3 +26,4 @@ target_link_options(pdf-remover.js PRIVATE
     "SHELL:-s ENVIRONMENT=web"
     "--bind"
 )
+

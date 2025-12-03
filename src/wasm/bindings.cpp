@@ -29,6 +29,7 @@ class PDFRemoverWrapper {
 private:
     PDFPasswordRemover remover;
     std::vector<uint8_t> lastOutput;
+    std::string lastLog;
 
 public:
     /**
@@ -39,7 +40,16 @@ public:
      */
     bool processPDF(const val& inputData, const std::string& password) {
         try {
-            // Convert JS array to C++ string for the input
+            // Validate inputs
+            if (!inputData.isNull() && inputData["length"].as<size_t>() == 0) {
+                return false;
+            }
+            
+            if (password.empty()) {
+                return false;
+            }
+
+            // Convert JS Uint8Array to std::string for the input
             const size_t length = inputData["length"].as<size_t>();
             std::string inputStr;
             inputStr.resize(length);
@@ -57,9 +67,13 @@ public:
                 lastOutput.resize(outputStr.size());
                 std::memcpy(lastOutput.data(), outputStr.data(), outputStr.size());
             }
+            
+            // Store last log message
+            lastLog = remover.getLastLog();
 
             return success;
         } catch (const std::exception& e) {
+            lastLog = std::string("Exception in processPDF: ") + e.what();
             return false;
         }
     }
@@ -79,6 +93,14 @@ public:
     int getOutputSize() const {
         return lastOutput.size();
     }
+
+    /**
+     * Get the last log message
+     * @return String containing debug information
+     */
+    std::string getLog() const {
+        return lastLog;
+    }
 };
 
 // Emscripten bindings
@@ -87,5 +109,6 @@ EMSCRIPTEN_BINDINGS(pdf_remover_module) {
         .constructor<>()
         .function("processPDF", &PDFRemoverWrapper::processPDF)
         .function("getOutput", &PDFRemoverWrapper::getOutput)
-        .function("getOutputSize", &PDFRemoverWrapper::getOutputSize);
+        .function("getOutputSize", &PDFRemoverWrapper::getOutputSize)
+        .function("getLog", &PDFRemoverWrapper::getLog);
 }

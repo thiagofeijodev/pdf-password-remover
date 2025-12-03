@@ -12,10 +12,11 @@ export const useWasmPDFRemover = () => {
   useEffect(() => {
     const loadWasm = async () => {
       try {
-        // Import the WASM module from the public directory
-        // The module initializes with a locateFile function that tells it where to find the .wasm binary
+        // Import the WASM module from the public directory with cache busting
+        // Add timestamp to force fresh load
+        const timestamp = new Date().getTime();
         const wasmModule = await import(
-          /* webpackIgnore: true */ '/pdf-password-remover/pdf-remover.js'
+          /* webpackIgnore: true */ `/pdf-password-remover/pdf-remover.js?t=${timestamp}`
         );
 
         // Initialize the WASM module with proper file location
@@ -23,7 +24,7 @@ export const useWasmPDFRemover = () => {
           locateFile: (filename) => {
             // Tell the WASM loader where to find files relative to app root
             if (filename.endsWith('.wasm')) {
-              return `${window.location.origin}/pdf-password-remover/${filename}`;
+              return `${window.location.origin}/pdf-password-remover/${filename}?t=${timestamp}`;
             }
             return filename;
           },
@@ -58,23 +59,45 @@ export const useWasmPDFRemover = () => {
       // Create remover instance
       const remover = new wasmModule.PDFRemover();
 
-      // Convert ArrayBuffer to Uint8Array for WASM
-      const uint8Array = new Uint8Array(pdfData);
+      console.log(
+        '[WASM] Available methods:',
+        Object.getOwnPropertyNames(Object.getPrototypeOf(remover)),
+      );
+
+      // Convert ArrayBuffer to Uint8Array for WASM processing
+      const pdfArray = new Uint8Array(pdfData);
+
+      console.log('[WASM] Starting PDF processing...');
+      console.log('[WASM] PDF size:', pdfArray.length, 'bytes');
+      console.log('[WASM] Password length:', password.length, 'characters');
 
       // Process the PDF
-      const success = remover.processPDF(uint8Array, password);
+      const success = remover.processPDF(pdfArray, password);
+
+      console.log('[WASM] processPDF returned:', success);
+
+      // Get debug log from WASM
+      const wasmLog = remover.getLog();
+      console.log('[WASM Debug Log]:\n', wasmLog);
 
       if (!success) {
-        throw new Error('Failed to process PDF with WASM');
+        throw new Error('Failed to process PDF with WASM - PDF decryption failed.');
       }
+
+      console.log('[WASM] Processing succeeded');
 
       // Get the output
       const output = remover.getOutput();
+      console.log('[WASM] Output size:', output.length, 'bytes');
+
+      if (!output || output.length === 0) {
+        throw new Error('WASM returned empty output');
+      }
 
       // Convert Uint8Array back to ArrayBuffer
       return output.buffer.slice(output.byteOffset, output.byteOffset + output.byteLength);
     } catch (err) {
-      console.error('WASM PDF processing error:', err);
+      console.error('[WASM] PDF processing error:', err);
       throw err;
     }
   };

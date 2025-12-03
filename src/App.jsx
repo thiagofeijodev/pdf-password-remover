@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
 import * as styles from './App.module.css';
-import { useWasmPDFRemover } from './hooks/useWasmPDFRemover';
+import { usePDFPasswordRemover } from './hooks/usePDFPasswordRemover';
 import { createGoogleTag } from './utils/createGoogleTag';
+//import { useWasmPDFRemover } from './hooks/useWasmPDFRemover';
+import { usePdfiumPDFRemover } from './hooks/usePdfiumPDFRemover';
 
 const App = () => {
+  const { processPDFWithPdfium } = usePdfiumPDFRemover();
   const {
     password,
     isProcessing,
@@ -13,7 +16,7 @@ const App = () => {
     handleFileChange,
     handlePasswordChange,
     handleRemovePassword,
-  } = useWasmPDFRemover();
+  } = usePDFPasswordRemover(processPDFWithPdfium);
 
   useEffect(() => {
     createGoogleTag();

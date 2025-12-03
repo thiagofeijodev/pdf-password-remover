@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { createPDFObject } from '../utils/createPDFObject';
 import { toPDFDocument } from '../utils/toPDFDocument';
 import { downloadBlob } from '../utils/downloadBlob';
+import { createPDFBuffer } from '../utils/createPDFBuffer';
 
 const STORAGE_KEY = 'pdfPasswordRemover_data';
 
-export const usePDFPasswordRemover = () => {
+export const usePDFPasswordRemover = (processPDFWithWasm) => {
   const [file, setFile] = useState(null);
   const [password, setPassword] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -70,14 +71,23 @@ export const usePDFPasswordRemover = () => {
     setError('');
 
     try {
-      // create PDF.js document object with password
-      const pdfDocument = await createPDFObject(file, password);
+      const pdfBuffer = await createPDFBuffer(file);
 
-      // convert PDF to new PDF without password
-      const newPdf = await toPDFDocument(pdfDocument);
+      if (processPDFWithWasm) {
+        const newPdf = await processPDFWithWasm(pdfBuffer, password);
 
-      // download the new PDF without password
-      downloadBlob(newPdf, fileName);
+        // download the new PDF without password
+        downloadBlob(newPdf, fileName);
+      } else {
+        // create PDF.js document object with password
+        const pdfDocument = await createPDFObject(pdfBuffer, password);
+
+        // convert PDF to new PDF without password
+        const newPdf = await toPDFDocument(pdfDocument);
+
+        // download the new PDF without password
+        downloadBlob(newPdf, fileName);
+      }
 
       setIsProcessing(false);
     } catch (err) {

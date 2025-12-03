@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node .config/rspack/rspack.dev.mjs",
     "build": "rspack --config .config/rspack/rspack.prod.mjs",
-    "build:wasm": "cd src/wasm && emcmake cmake -B build_wasm && cmake --build build_wasm && cp build_wasm/pdf-remover.* ../../build/",
+    "build:wasm": "cd src/wasm && emcmake cmake -B build_wasm && cmake --build build_wasm && cp build_wasm/pdf-remover.* ../../public/",
     "analyzer": "rspack build --analyze --mode development --config .config/rspack/rspack.prod.mjs",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
@@ -23,6 +23,7 @@
   "dependencies": {
     "core-js": "^3.46.0",
     "jspdf": "^3.0.4",
+    "@embedpdf/pdfium": "^1.5.0",
     "pdfjs-dist": "^5.4.449",
     "react": "19.2.0",
     "react-dom": "19.2.0"

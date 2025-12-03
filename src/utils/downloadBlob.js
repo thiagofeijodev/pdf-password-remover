@@ -1,6 +1,4 @@
-export const downloadBlob = (newPdf, fileName) => {
-  const pdfBlob = newPdf.output('blob');
-
+export const downloadBlob = (pdfBlob, fileName) => {
   // Create download link
   const url = URL.createObjectURL(pdfBlob);
   const a = document.createElement('a');
