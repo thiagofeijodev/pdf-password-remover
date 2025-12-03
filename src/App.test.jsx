@@ -6,6 +6,7 @@ import { createGoogleTag } from './utils/createGoogleTag';
 
 // Mock dependencies
 jest.mock('./hooks/usePDFPasswordRemover');
+jest.mock('./hooks/useWasmPDFRemover');
 jest.mock('./utils/createGoogleTag');
 
 // Mock pdfjs-dist to avoid ESM issues
@@ -58,6 +59,15 @@ describe('App', () => {
       handleFileChange: mockHandleFileChange,
       handlePasswordChange: mockHandlePasswordChange,
       handleRemovePassword: mockHandleRemovePassword,
+    });
+    // Mock the WASM hook to return a non-loading state without WASM
+    const mockUseWasmPDFRemover = jest.requireMock('./hooks/useWasmPDFRemover').useWasmPDFRemover;
+    mockUseWasmPDFRemover.mockReturnValue({
+      wasmModule: null,
+      isLoading: false,
+      error: null,
+      processPDFWithWasm: jest.fn(),
+      isWasmAvailable: false,
     });
   });
 
