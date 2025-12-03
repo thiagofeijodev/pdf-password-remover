@@ -147,7 +147,7 @@ const config = [
       '**/bun.lock',
       '**/package-lock.json',
       '**/pdf-remover.js',
-      '**/test*.js',
+      '**/test*.{js,ts,mjs}',
     ],
   },
 ];
