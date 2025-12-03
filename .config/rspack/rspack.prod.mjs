@@ -1,5 +1,5 @@
 import path from 'path';
-import { WebpackAssetsManifest } from 'webpack-assets-manifest';
+import { RspackManifestPlugin } from 'rspack-manifest-plugin';
 import WorkboxPlugin from 'workbox-webpack-plugin';
 import FaviconsRspackPlugin from 'favicons-rspack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
@@ -37,7 +37,7 @@ export default () => {
       new CompressionPlugin({
         filename: '[path][base].gz',
       }),
-      new WebpackAssetsManifest({}),
+      new RspackManifestPlugin({}),
       new WorkboxPlugin.GenerateSW(),
     ],
     optimization: {
