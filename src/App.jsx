@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import * as styles from './App.module.css';
 import { usePDFPasswordRemover } from './hooks/usePDFPasswordRemover';
 import { createGoogleTag } from './utils/createGoogleTag';
-//import { useWasmPDFRemover } from './hooks/useWasmPDFRemover';
 import { usePdfiumPDFRemover } from './hooks/usePdfiumPDFRemover';
 
 const App = () => {

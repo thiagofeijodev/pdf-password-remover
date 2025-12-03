@@ -64,7 +64,7 @@ export default {
   },
   plugins: [
     new rspack.CopyRspackPlugin({
-      patterns: [{ from: 'public/pdf-remover.wasm' }, { from: 'public/pdf-remover.js' }],
+      patterns: [{ from: 'public/pdfium.wasm' }],
     }),
   ],
 };

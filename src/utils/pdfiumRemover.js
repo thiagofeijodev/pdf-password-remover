@@ -24,7 +24,7 @@ const initPdfium = async () => {
     console.log('[PDFium] Initializing pdfium.wasm...');
 
     // Load WASM binary from CDN
-    const pdfiumWasm = 'https://cdn.jsdelivr.net/npm/@embedpdf/pdfium/dist/pdfium.wasm';
+    const pdfiumWasm = 'https://feijo.dev/pdf-password-remover/pdfium.wasm';
     const response = await fetch(pdfiumWasm);
     const wasmBinary = await response.arrayBuffer();
 
