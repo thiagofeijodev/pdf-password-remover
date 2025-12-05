@@ -12,6 +12,17 @@
 
 import { init } from '@embedpdf/pdfium';
 
+// Constants
+const PDFIUM_WASM_URL = 'https://feijo.dev/pdf-password-remover/pdfium.wasm';
+const FPDF_REMOVE_SECURITY = 3;
+const FPDF_ERROR_PASSWORD_REQUIRED = 4;
+const FPDF_ERROR_NO_ERROR = 0;
+const FPDF_ERROR_UNKNOWN = 1;
+const FILEWRITE_STRUCT_SIZE = 8; // 4 bytes version + 4 bytes function pointer
+const FILEWRITE_VERSION = 1;
+const FILEWRITE_CALLBACK_SUCCESS = 1;
+const FILEWRITE_CALLBACK_FAILURE = 0;
+
 let pdfiumInstance = null;
 
 /**
@@ -21,33 +32,17 @@ const initPdfium = async () => {
   if (pdfiumInstance) return pdfiumInstance;
 
   try {
-    console.log('[PDFium] Initializing pdfium.wasm...');
-
-    // Load WASM binary from CDN
-    const pdfiumWasm = 'https://feijo.dev/pdf-password-remover/pdfium.wasm';
-    const response = await fetch(pdfiumWasm);
+    const response = await fetch(PDFIUM_WASM_URL);
     const wasmBinary = await response.arrayBuffer();
 
     pdfiumInstance = await init({ wasmBinary });
-
-    // Initialize the PDFium extension library (REQUIRED)
     pdfiumInstance.PDFiumExt_Init();
 
-    console.log('[PDFium] ✓ pdfium.wasm initialized');
     return pdfiumInstance;
   } catch (err) {
-    console.error('[PDFium] ✗ Failed to initialize pdfium:', err);
+    console.error('[PDFium] Failed to initialize:', err);
     throw err;
   }
-};
-
-/**
- * Helper to encode password string to UTF-8 in WASM memory
- */
-const encodePasswordToWasm = (pdfium, password) => {
-  // The wrapper handles string-to-pointer conversion automatically
-  // Just return the password string or 0 for no password
-  return password || 0;
 };
 
 /**
@@ -58,130 +53,90 @@ const encodePasswordToWasm = (pdfium, password) => {
  */
 export const pdfiumRemover = async (pdfData, password) => {
   const pdfium = await initPdfium();
+  const wasmExports = pdfium.pdfium.wasmExports;
+  const wasmMemory = pdfium.pdfium.wasmExports.memory.buffer;
+
+  // Allocate memory for PDF data
+  const pdfSize = pdfData.byteLength;
+  const filePtr = wasmExports.malloc(pdfSize);
+  const heapBytes = new Uint8Array(wasmMemory, filePtr, pdfSize);
+  heapBytes.set(new Uint8Array(pdfData));
+
+  // Use password string directly or undefined for no password
+  const passwordPtr = password || 0;
 
   try {
-    console.log('[PDFium] Attempting direct PDF decryption...');
-    console.log(`[PDFium] PDF size: ${pdfData.byteLength} bytes`);
+    // Load PDF document with password
+    const docPtr = pdfium.FPDF_LoadMemDocument(filePtr, pdfSize, passwordPtr);
 
-    // Allocate memory for PDF data
-    const pdfSize = pdfData.byteLength;
-    const filePtr = pdfium.pdfium.wasmExports.malloc(pdfSize);
-    const heapBytes = new Uint8Array(pdfium.pdfium.wasmExports.memory.buffer, filePtr, pdfSize);
-    heapBytes.set(new Uint8Array(pdfData));
+    if (!docPtr) {
+      const errorCode = pdfium.FPDF_GetLastError();
 
-    // Encode password if provided
-    const passwordPtr = encodePasswordToWasm(pdfium, password);
-
-    try {
-      // Load PDF document with password
-      const docPtr = pdfium.FPDF_LoadMemDocument(filePtr, pdfSize, passwordPtr);
-
-      if (!docPtr) {
-        const errorCode = pdfium.FPDF_GetLastError();
-        console.log(`[PDFium] Error code: ${errorCode}`);
-
-        if (errorCode === 4) {
-          throw new Error('Password required or incorrect password');
-        } else if (errorCode === 0 || errorCode === 1) {
-          // No password needed or error, try with password 0
-          pdfium.pdfium.wasmExports.free(filePtr);
-          if (passwordPtr) pdfium.pdfium.wasmExports.free(passwordPtr);
-          return new Blob([pdfData], { type: 'application/pdf' });
-        } else {
-          throw new Error(`Failed to load PDF: error code ${errorCode}`);
-        }
+      if (errorCode === FPDF_ERROR_PASSWORD_REQUIRED) {
+        throw new Error('Password required or incorrect password');
       }
-
-      console.log('[PDFium] ✓ PDF loaded');
-
-      // Get page count to verify it's accessible
-      const pageCount = pdfium.FPDF_GetPageCount(docPtr);
-      console.log(`[PDFium] ✓ PDF has ${pageCount} pages`);
-
-      if (pageCount <= 0) {
-        throw new Error('Invalid PDF or unable to access pages');
+      if (errorCode === FPDF_ERROR_NO_ERROR || errorCode === FPDF_ERROR_UNKNOWN) {
+        // PDF has no password or error loading, return as-is
+        return new Blob([pdfData], { type: 'application/pdf' });
       }
-
-      // Array to collect the saved PDF bytes
-      const savedPdfChunks = [];
-
-      // Create the FPDF_FILEWRITE structure
-      // The structure needs: version (int) and WriteBlock (function pointer)
-      const fileWriteStructSize = 8; // 4 bytes for version + 4 bytes for function pointer
-      const fileWritePtr = pdfium.pdfium.wasmExports.malloc(fileWriteStructSize);
-
-      // Set version to 1
-      const view = new DataView(pdfium.pdfium.wasmExports.memory.buffer);
-      view.setInt32(fileWritePtr, 1, true); // version = 1, little-endian
-
-      // Create a callback function for writing blocks
-      // The callback signature is: int (*WriteBlock)(FPDF_FILEWRITE* pThis, const void* data, unsigned long size)
-      const writeBlockCallback = pdfium.pdfium.addFunction((pThis, dataPtr, size) => {
-        try {
-          // Read the data from WASM memory
-          const data = new Uint8Array(pdfium.pdfium.wasmExports.memory.buffer, dataPtr, size);
-          // Copy the data to our chunks array
-          savedPdfChunks.push(new Uint8Array(data));
-          return 1; // Return 1 for success
-        } catch (err) {
-          console.error('[PDFium] Error in WriteBlock callback:', err);
-          return 0; // Return 0 for failure
-        }
-      }, 'iiii'); // signature: int function(int, int, int)
-
-      // Set the function pointer in the structure
-      view.setInt32(fileWritePtr + 4, writeBlockCallback, true); // little-endian
-
-      // FPDF_REMOVE_SECURITY flag = 3
-      const FPDF_REMOVE_SECURITY = 3;
-
-      // Save the PDF without password
-      console.log('[PDFium] Calling FPDF_SaveAsCopy...');
-      const saveResult = pdfium.FPDF_SaveAsCopy(docPtr, fileWritePtr, FPDF_REMOVE_SECURITY);
-
-      if (!saveResult) {
-        console.error('[PDFium] ✗ Failed to save PDF');
-        pdfium.pdfium.removeFunction(writeBlockCallback);
-        pdfium.pdfium.wasmExports.free(fileWritePtr);
-        pdfium.FPDF_CloseDocument(docPtr);
-        throw new Error('Failed to save PDF copy');
-      }
-
-      console.log(`[PDFium] ✓ PDF saved successfully (${savedPdfChunks.length} chunks)`);
-
-      // Combine all chunks into a single buffer
-      const totalSize = savedPdfChunks.reduce((sum, chunk) => sum + chunk.length, 0);
-      const savedPdfData = new Uint8Array(totalSize);
-      let offset = 0;
-      for (const chunk of savedPdfChunks) {
-        savedPdfData.set(chunk, offset);
-        offset += chunk.length;
-      }
-
-      console.log(`[PDFium] ✓ Combined PDF data: ${savedPdfData.length} bytes`);
-
-      // Clean up
-      pdfium.pdfium.removeFunction(writeBlockCallback);
-      pdfium.pdfium.wasmExports.free(fileWritePtr);
-      pdfium.FPDF_CloseDocument(docPtr);
-
-      console.log('[PDFium] ✓ PDF decrypted successfully');
-      console.log('[PDFium] savedPdfData type:', savedPdfData.constructor.name);
-      console.log('[PDFium] savedPdfData length:', savedPdfData.length);
-
-      // Return Blob directly from the Uint8Array
-      const blob = new Blob([savedPdfData], { type: 'application/pdf' });
-      console.log('[PDFium] Created blob:', blob);
-      console.log('[PDFium] Blob size:', blob.size);
-      console.log('[PDFium] Blob type:', blob.type);
-      return blob;
-    } finally {
-      // Clean up memory
-      pdfium.pdfium.wasmExports.free(filePtr);
-      if (passwordPtr) pdfium.pdfium.wasmExports.free(passwordPtr);
+      throw new Error(`Failed to load PDF: error code ${errorCode}`);
     }
+
+    // Verify document is accessible
+    const pageCount = pdfium.FPDF_GetPageCount(docPtr);
+    if (pageCount <= 0) {
+      throw new Error('Invalid PDF or unable to access pages');
+    }
+
+    // Collect PDF output chunks
+    const savedPdfChunks = [];
+
+    // Create FPDF_FILEWRITE structure
+    const fileWritePtr = wasmExports.malloc(FILEWRITE_STRUCT_SIZE);
+    const view = new DataView(wasmMemory);
+    view.setInt32(fileWritePtr, FILEWRITE_VERSION, true);
+
+    // Write callback for PDF chunks
+    const writeBlockCallback = pdfium.pdfium.addFunction((pThis, dataPtr, size) => {
+      try {
+        const data = new Uint8Array(wasmMemory, dataPtr, size);
+        savedPdfChunks.push(new Uint8Array(data));
+        return FILEWRITE_CALLBACK_SUCCESS;
+      } catch (err) {
+        console.error('[PDFium] WriteBlock error:', err);
+        return FILEWRITE_CALLBACK_FAILURE;
+      }
+    }, 'iiii');
+
+    view.setInt32(fileWritePtr + 4, writeBlockCallback, true);
+
+    // Save PDF without security
+    const saveResult = pdfium.FPDF_SaveAsCopy(docPtr, fileWritePtr, FPDF_REMOVE_SECURITY);
+
+    if (!saveResult) {
+      throw new Error('Failed to save PDF copy');
+    }
+
+    // Combine chunks into single buffer
+    const totalSize = savedPdfChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+    const savedPdfData = new Uint8Array(totalSize);
+    let offset = 0;
+    for (const chunk of savedPdfChunks) {
+      savedPdfData.set(chunk, offset);
+      offset += chunk.length;
+    }
+
+    // Cleanup
+    pdfium.pdfium.removeFunction(writeBlockCallback);
+    wasmExports.free(fileWritePtr);
+    pdfium.FPDF_CloseDocument(docPtr);
+
+    return new Blob([savedPdfData], { type: 'application/pdf' });
   } catch (err) {
-    console.error('[PDFium] Direct decryption error:', err.message);
+    console.error('[PDFium] Decryption error:', err.message);
     throw err;
+  } finally {
+    // Always clean up allocated memory
+    wasmExports.free(filePtr);
   }
 };
