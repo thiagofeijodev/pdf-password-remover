@@ -5,7 +5,7 @@ export default {
   entry: path.resolve(process.cwd(), 'src/index.jsx'),
   output: {
     filename: 'static/[name].[contenthash].js',
-    publicPath: '/pdf-password-remover',
+    publicPath: '/pdf-password-remover/',
     clean: true,
   },
   resolve: {
@@ -51,9 +51,6 @@ export default {
         use: [
           {
             loader: 'file-loader',
-            options: {
-              name: '/[hash]-[name].[ext]',
-            },
           },
         ],
       },
