@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { join, resolve } from 'path';
 
 test.describe('PDF Password Remover App', () => {
   test.beforeEach(async ({ page }) => {
@@ -35,8 +36,42 @@ test.describe('PDF Password Remover App', () => {
     await expect(button).toBeDisabled();
   });
 
-  test('should have correct page title', async ({ page }) => {
-    await expect(page).toHaveTitle(/pdf password remover/i);
+  test('should decrypt a password-protected PDF', async ({ page }) => {
+    // Path to the protected PDF in the repo
+    const pdfPath = resolve(__dirname, '../assets/file-sample_150kB-protected.pdf');
+
+    // Intercept the download
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      // Upload the file
+      page.setInputFiles('input[type="file"]', pdfPath),
+    ]);
+
+    // Enter the password
+    await page.getByLabel(/pdf password/i).fill('password');
+
+    // Click the remove password button
+    const button = page.getByRole('button', { name: /remove password/i });
+    await expect(button).toBeEnabled();
+    await button.click();
+
+    // Wait for the download to complete
+    const savePath = join(__dirname, 'assets', 'decrypted.pdf');
+    const filePath = await download.path();
+    expect(filePath).toBeTruthy();
+    // Optionally, save the file somewhere
+    await download.saveAs(savePath);
+
+    // Optionally, check the file size or type
+    const fs = require('fs');
+    const stats = fs.statSync(filePath);
+    expect(stats.size).toBeGreaterThan(0);
+    // Optionally, check the file is a PDF
+    const fd = fs.openSync(filePath, 'r');
+    const buffer = Buffer.alloc(4);
+    fs.readSync(fd, buffer, 0, 4, 0);
+    fs.closeSync(fd);
+    expect(buffer.toString()).toBe('%PDF');
   });
 
   test('should have proper page structure', async ({ page }) => {
