@@ -42,6 +42,12 @@ body {
   margin: 0 auto 16px;
   display: block;
 }
+/* Make the logo appear as a circular crop */
+.logo {
+  border-radius: 50%;
+  object-fit: cover;
+  overflow: hidden;
+}
 
 .title {
   font-size: 32px;

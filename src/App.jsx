@@ -100,6 +100,7 @@ const App = () => {
         <div className={styles.info}>
           <p>🔒 All processing is done in your browser</p>
           <p>📁 Your files never leave your device</p>
+          <p>⚙️ Built with WebAssembly & PDFium</p>
         </div>
       </div>
     </div>
