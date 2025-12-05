@@ -38,7 +38,7 @@ test.describe('PDF Password Remover App', () => {
 
   test('should decrypt a password-protected PDF', async ({ page }) => {
     // Path to the protected PDF in the repo
-    const pdfPath = resolve(__dirname, '../assets/file-sample_150kB-protected.pdf');
+    const pdfPath = resolve(__dirname, './assets/file-sample_150kB-protected.pdf');
 
     // Intercept the download
     const [download] = await Promise.all([
