@@ -53,6 +53,7 @@ export default {
             loader: 'file-loader',
             options: {
               name: '[hash]-[name].[ext]',
+              outputPath: 'images/',
             },
           },
         ],
