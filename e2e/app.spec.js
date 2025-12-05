@@ -40,12 +40,8 @@ test.describe('PDF Password Remover App', () => {
     // Path to the protected PDF in the repo
     const pdfPath = resolve(__dirname, './assets/file-sample_150kB-protected.pdf');
 
-    // Intercept the download
-    const [download] = await Promise.all([
-      page.waitForEvent('download'),
-      // Upload the file
-      page.setInputFiles('input[type="file"]', pdfPath),
-    ]);
+    // Upload the file
+    await page.setInputFiles('input[type="file"]', pdfPath);
 
     // Enter the password
     await page.getByLabel(/pdf password/i).fill('password');
@@ -53,7 +49,9 @@ test.describe('PDF Password Remover App', () => {
     // Click the remove password button
     const button = page.getByRole('button', { name: /remove password/i });
     await expect(button).toBeEnabled();
-    await button.click();
+
+    // Intercept the download after button click
+    const [download] = await Promise.all([page.waitForEvent('download'), button.click()]);
 
     // Wait for the download to complete
     const savePath = join(__dirname, 'assets', 'decrypted.pdf');

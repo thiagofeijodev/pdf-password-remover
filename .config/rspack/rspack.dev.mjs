@@ -31,7 +31,7 @@ const rspackConfig = {
     static: path.join(process.cwd(), 'static'),
     historyApiFallback: true,
     host: '0.0.0.0',
-    open: ['/pdf-password-remover'],
+    open: ['/pdf-password-remover/'],
     hot: true,
     client: {
       overlay: {
