@@ -3,6 +3,7 @@ import * as styles from './App.module.css';
 import { usePDFPasswordRemover } from './hooks/usePDFPasswordRemover';
 import { createGoogleTag } from './utils/createGoogleTag';
 import { usePdfiumPDFRemover } from './hooks/usePdfiumPDFRemover';
+import LogoPng from '../public/logo.png';
 
 const App = () => {
   const { processPDFWithPdfium } = usePdfiumPDFRemover();
@@ -12,8 +13,10 @@ const App = () => {
     error,
     fileName,
     file,
+    savePassword,
     handleFileChange,
     handlePasswordChange,
+    handleSavePasswordChange,
     handleRemovePassword,
   } = usePDFPasswordRemover(processPDFWithPdfium);
 
@@ -24,6 +27,7 @@ const App = () => {
   return (
     <div className={styles.container}>
       <div className={styles.card}>
+        <img src={LogoPng} alt="PDF Password Remover Logo" className={styles.logo} />
         <h1 className={styles.title}>PDF Password Remover</h1>
         <p className={styles.subtitle}>
           Upload a password-protected PDF and remove its password protection
@@ -67,6 +71,19 @@ const App = () => {
                 }
               }}
             />
+            <div className={styles.checkboxGroup}>
+              <input
+                id="save-password-checkbox"
+                type="checkbox"
+                checked={savePassword}
+                onChange={handleSavePasswordChange}
+                className={styles.checkbox}
+                disabled={isProcessing}
+              />
+              <label htmlFor="save-password-checkbox" className={styles.checkboxLabel}>
+                Save password for next time
+              </label>
+            </div>
           </div>
 
           {error && <div className={styles.error}>{error}</div>}
