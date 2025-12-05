@@ -4,7 +4,7 @@ import { join, resolve } from 'path';
 test.describe('PDF Password Remover App', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the app
-    const appUrl = process.env.APP_URL || 'http://localhost:3001/pdf-password-remover';
+    const appUrl = process.env.APP_URL || 'http://localhost:3001/pdf-password-remover/';
     await page.goto(appUrl);
   });
 
