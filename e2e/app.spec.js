@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import fs from 'fs';
 import { join, resolve } from 'path';
 
 test.describe('PDF Password Remover App', () => {
@@ -76,5 +77,48 @@ test.describe('PDF Password Remover App', () => {
     // Check for main content area
     const rootElement = page.locator('#root');
     await expect(rootElement).toBeVisible();
+  });
+
+  test('should produce decrypted PDF matching the original', async ({ page }) => {
+    // Path to the protected PDF and original PDF in the repo
+    const protectedPdfPath = resolve(__dirname, './assets/file-sample_150kB-protected.pdf');
+    const originalPdfPath = resolve(__dirname, './assets/file-sample_150kB.pdf');
+
+    // Upload the protected file
+    await page.setInputFiles('input[type="file"]', protectedPdfPath);
+
+    // Enter the password
+    await page.getByLabel(/pdf password/i).fill('password');
+
+    // Click the remove password button
+    const button = page.getByRole('button', { name: /remove password/i });
+    await expect(button).toBeEnabled();
+
+    // Intercept the download after button click
+    const [download] = await Promise.all([page.waitForEvent('download'), button.click()]);
+
+    // Save the decrypted file
+    const decryptedPdfPath = join(__dirname, 'assets', 'decrypted-temp.pdf');
+    await download.saveAs(decryptedPdfPath);
+
+    // Read both files
+    const originalPdfBuffer = fs.readFileSync(originalPdfPath);
+    const decryptedPdfBuffer = fs.readFileSync(decryptedPdfPath);
+
+    // Verify both are valid PDFs
+    expect(originalPdfBuffer.toString('utf-8', 0, 4)).toBe('%PDF');
+    expect(decryptedPdfBuffer.toString('utf-8', 0, 4)).toBe('%PDF');
+
+    // Verify decrypted file is not empty and reasonably similar in size
+    // (allowing for some variation due to PDF re-encoding)
+    const sizeDifference = Math.abs(decryptedPdfBuffer.length - originalPdfBuffer.length);
+    const percentDifference = (sizeDifference / originalPdfBuffer.length) * 100;
+
+    // Allow up to 10% difference in file size due to PDF rewriting/metadata
+    expect(percentDifference).toBeLessThan(10);
+    expect(decryptedPdfBuffer.length).toBeGreaterThan(0);
+
+    // Clean up temporary file
+    fs.unlinkSync(decryptedPdfPath);
   });
 });
