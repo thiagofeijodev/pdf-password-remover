@@ -1,6 +1,6 @@
 {
   "main.css": "/pdf-password-remover/static/main.100af4b6a31f8740.css",
-  "main.js": "/pdf-password-remover/static/main.2b90ae0eccef675e.js",
+  "main.js": "/pdf-password-remover/static/main.e52ebac5a32d5d7a.js",
   "static/258.js": "/pdf-password-remover/static/258.b714721386ef7bc9.js",
   "pdfium.wasm": "/pdf-password-remover/pdfium.wasm",
   "assets/apple-touch-startup-image-2732x2048.png": "/pdf-password-remover/assets/apple-touch-startup-image-2732x2048.png",
@@ -75,8 +75,8 @@
   "assets/android-chrome-48x48.png": "/pdf-password-remover/assets/android-chrome-48x48.png",
   "assets/favicon-48x48.png": "/pdf-password-remover/assets/favicon-48x48.png",
   "workbox-915e8d08.js.gz": "/pdf-password-remover/workbox-915e8d08.js.gz",
+  "static/main.js.gz": "/pdf-password-remover/static/main.e52ebac5a32d5d7a.js.gz",
   "assets/android-chrome-36x36.png": "/pdf-password-remover/assets/android-chrome-36x36.png",
-  "static/main.js.gz": "/pdf-password-remover/static/main.2b90ae0eccef675e.js.gz",
   "assets/favicon-32x32.png": "/pdf-password-remover/assets/favicon-32x32.png",
   "service-worker.js.gz": "/pdf-password-remover/service-worker.js.gz",
   "assets/manifest.webmanifest": "/pdf-password-remover/assets/manifest.webmanifest",
