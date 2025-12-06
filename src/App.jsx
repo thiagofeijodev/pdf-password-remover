@@ -103,6 +103,12 @@ const App = () => {
           <p>⚙️ Built with WebAssembly & PDFium</p>
         </div>
       </div>
+      <footer className={styles.footer}>
+        developed by{' '}
+        <a href="https://feijo.dev" target="_blank" rel="noopener noreferrer">
+          feijo.dev
+        </a>
+      </footer>
     </div>
   );
 };

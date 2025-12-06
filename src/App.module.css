@@ -44,6 +44,7 @@ body {
   margin: 0 auto 16px;
   display: block;
 }
+
 /* Make the logo appear as a circular crop */
 .logo {
   border-radius: 50%;
@@ -228,4 +229,24 @@ body {
   .subtitle {
     font-size: 14px;
   }
+}
+
+.footer {
+  position: absolute;
+  bottom: 20px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.footer a {
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  transition: opacity 0.2s;
+}
+
+.footer a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
