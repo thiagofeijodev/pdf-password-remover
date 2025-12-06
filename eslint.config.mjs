@@ -51,13 +51,7 @@ const config = [
 
   // Configuration files (including this one)
   {
-    files: [
-      'eslint.config.js',
-      'playwright.config.js',
-      '.config/**/*.{js,ts,mjs}',
-      'commitlint.config.js',
-      'jest.config.mjs',
-    ],
+    files: ['eslint.config.js', 'playwright.config.js', 'commitlint.config.js', 'jest.config.mjs'],
     languageOptions: {
       globals: {
         require: 'readonly',
@@ -79,6 +73,58 @@ const config = [
     },
   },
 
+  // Other config directory files
+  {
+    files: ['.config/**/*.{js,ts,mjs}'],
+    ignores: ['.config/tests/**'],
+    languageOptions: {
+      globals: {
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        process: 'readonly',
+        console: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-var-requires': 'off',
+      'no-console': 'off',
+    },
+  },
+
+  // Test setup configuration
+  {
+    files: ['.config/tests/**/*.{js,ts,mjs}'],
+    languageOptions: {
+      ...jest.configs['flat/recommended'].languageOptions,
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.jest,
+        global: 'readonly',
+        WebAssembly: 'readonly',
+        window: 'readonly',
+        console: 'readonly',
+        module: 'readonly',
+      },
+    },
+    plugins: {
+      ...jest.configs['flat/recommended'].plugins,
+    },
+    rules: {
+      ...jest.configs['flat/recommended'].rules,
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-var-requires': 'off',
+      'no-console': 'off',
+    },
+  },
+
   // Jest test configuration
   {
     files: ['**/*.{test,spec}.{js,jsx,ts,tsx}'],
@@ -92,6 +138,7 @@ const config = [
       globals: {
         ...globals.jest,
         global: 'readonly',
+        require: 'readonly',
       },
     },
     plugins: {
@@ -111,6 +158,7 @@ const config = [
       'testing-library/no-container': 'warn',
       'testing-library/no-unnecessary-act': 'warn',
       'testing-library/no-node-access': 'off',
+      '@typescript-eslint/no-var-requires': 'off',
     },
   },
 
