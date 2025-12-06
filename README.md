@@ -29,10 +29,53 @@ To run this project locally, follow these steps:
 
 ## 🧪 Running Tests
 
-To execute the test suite:
+This project includes unit tests and end-to-end tests. Here's how to run them:
+
+### Unit Tests
+
+To execute the unit test suite using Jest:
 
 ```bash
 npm test
+```
+
+This runs all tests in the `src/` directory with a maximum of 2 concurrent workers.
+
+### End-to-End Tests
+
+Before running Playwright tests for the first time, install the required dependencies:
+
+```bash
+npm run test:prepare
+```
+
+Then, to run the Playwright e2e test suite:
+
+```bash
+npm run test:e2e
+```
+
+To run e2e tests in UI mode (interactive):
+
+```bash
+npm run test:e2e:ui
+```
+
+### Running All Tests
+
+To run both unit and e2e tests locally:
+
+```bash
+npm test && npm run test:e2e
+```
+
+### Test in CI Environment
+
+For continuous integration pipelines, use:
+
+```bash
+npm run test:ci        # Runs Jest with JSON output for CI
+npm run test:e2e:ci    # Runs Playwright in CI mode
 ```
 
 ## 📦 Build for Production
