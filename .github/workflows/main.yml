@@ -34,7 +34,6 @@ jobs:
 
       - name: Run E2E tests
         env:
-          APP_URL: ${{ secrets.APP_URL }}
           CI: 1
         run: npm run test:e2e:ci
 
