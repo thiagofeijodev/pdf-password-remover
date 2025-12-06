@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Health Check
         run: |
-          APP_URL="https://thiagofeijodev.github.io/countdown/"
+          APP_URL="https://feijo.dev/pdf-password-remover/"
 
           echo "🔍 Checking if app is accessible..."
 
@@ -55,6 +55,3 @@ jobs:
 
           echo ""
           echo "✅ Health check passed! App is up and running."
-
-        env:
-          APP_URL: ${{ secrets.APP_URL }}

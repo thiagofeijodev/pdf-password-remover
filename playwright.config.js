@@ -50,13 +50,9 @@ export default defineConfig({
       ],
 
   /* Run local dev server before starting the tests */
-  ...(process.env.CI
-    ? {}
-    : {
-        webServer: {
-          command: 'npm start',
-          port: 3001,
-          reuseExistingServer: !process.env.CI,
-        },
-      }),
+  webServer: {
+    command: 'npm start',
+    port: 3001,
+    reuseExistingServer: !process.env.CI,
+  },
 });

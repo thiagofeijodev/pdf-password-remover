@@ -17,7 +17,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:ci": "playwright test",
-    "test:prepare": "playwright install-deps",
+    "test:prepare": "playwright install --with-deps",
     "prepare": "husky"
   },
   "dependencies": {
