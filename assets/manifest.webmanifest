@@ -5,7 +5,7 @@
   "lang": "en-US",
   "display": "standalone",
   "orientation": "any",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "background_color": "#000000",
   "theme_color": "#000000",
   "icons": [
@@ -65,7 +65,7 @@
     }
   ],
   "description": "Remove password from PDF files",
-  "scope": "/",
+  "scope": "./",
   "display_override": [
     "window-control-overlay",
     "minimal-ui"
@@ -78,7 +78,7 @@
   "shortcuts": [
     {
       "name": "Home",
-      "url": "/"
+      "url": "./"
     }
   ]
 }
