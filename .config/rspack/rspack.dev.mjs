@@ -13,6 +13,7 @@ const rspackConfig = {
     ...common.output,
     path: path.resolve(process.cwd(), 'static'),
     filename: 'static/main.js',
+    publicPath: '/',
   },
   plugins: [
     ...common.plugins,
@@ -31,7 +32,7 @@ const rspackConfig = {
     static: path.join(process.cwd(), 'static'),
     historyApiFallback: true,
     host: '0.0.0.0',
-    open: ['/pdf-password-remover/'],
+    open: ['/'],
     hot: true,
     client: {
       overlay: {
