@@ -4,7 +4,7 @@ import { downloadBlob } from '../utils/downloadBlob';
 
 const STORAGE_KEY = 'pdfPasswordRemover_data';
 
-export const usePDFPasswordRemover = (processPDFWithPdfium) => {
+export const usePDFPasswordRemover = (processPDF) => {
   const [file, setFile] = useState(null);
   const [password, setPassword] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -93,7 +93,7 @@ export const usePDFPasswordRemover = (processPDFWithPdfium) => {
       const pdfDocument = await createPDFBuffer(file, password);
 
       // convert PDF to new PDF without password
-      const newPdf = await processPDFWithPdfium(pdfDocument, password);
+      const newPdf = await processPDF(pdfDocument, password);
 
       // download the new PDF without password
       downloadBlob(newPdf, fileName);

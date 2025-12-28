@@ -12,8 +12,8 @@ const rspackConfig = {
   output: {
     ...common.output,
     path: path.resolve(process.cwd(), 'static'),
-    filename: 'static/main.js',
-    publicPath: '/',
+    filename: 'static/[name].js',
+    publicPath: 'auto',
   },
   plugins: [
     ...common.plugins,

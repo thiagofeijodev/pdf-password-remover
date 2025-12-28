@@ -8,13 +8,13 @@ import userEvent from '@testing-library/user-event';
 import App from './App';
 
 // Mock the hooks
-jest.mock('./hooks/usePdfiumPDFRemover');
+jest.mock('./hooks/useRustPDFRemover');
 jest.mock('./hooks/usePDFPasswordRemover');
 jest.mock('./utils/createGoogleTag');
 jest.mock('../public/logo.png', () => 'logo.png');
 
 describe('App Component', () => {
-  const mockUsePdfiumPDFRemover = require('./hooks/usePdfiumPDFRemover').usePdfiumPDFRemover;
+  const mockUseRustPDFRemover = require('./hooks/useRustPDFRemover').useRustPDFRemover;
   const mockUsePDFPasswordRemover = require('./hooks/usePDFPasswordRemover').usePDFPasswordRemover;
   const mockCreateGoogleTag = require('./utils/createGoogleTag').createGoogleTag;
 
@@ -22,12 +22,12 @@ describe('App Component', () => {
     jest.clearAllMocks();
 
     // Setup default mock implementations
-    mockUsePdfiumPDFRemover.mockReturnValue({
-      processPDFWithPdfium: jest.fn(async (pdfData) => {
+    mockUseRustPDFRemover.mockReturnValue({
+      processPDFWithRust: jest.fn(async (pdfData) => {
         return new Blob([pdfData], { type: 'application/pdf' });
       }),
       isLoading: false,
-      isPdfiumAvailable: true,
+      isReady: true,
     });
 
     mockUsePDFPasswordRemover.mockReturnValue({

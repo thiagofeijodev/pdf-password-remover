@@ -1,4 +1,3 @@
-import { rspack } from '@rspack/core';
 import path from 'path';
 
 export default {
@@ -8,11 +7,24 @@ export default {
     publicPath: 'auto',
     clean: true,
   },
+  experiments: {
+    css: true,
+    asyncWebAssembly: true,
+  },
   resolve: {
     extensions: ['.js', '.jsx'],
   },
   module: {
     rules: [
+      {
+        test: /\.module\.css$/,
+        type: 'css/module',
+      },
+      {
+        test: /\.css$/,
+        exclude: /\.module\.css$/,
+        type: 'css',
+      },
       {
         test: /\.(jsx|js)$/,
         exclude: /node_modules[\\/]core-js/,
@@ -54,14 +66,11 @@ export default {
           },
         ],
       },
+      {
+        test: /\.wasm$/,
+        type: 'asset/resource',
+      },
     ],
   },
-  experiments: {
-    css: true,
-  },
-  plugins: [
-    new rspack.CopyRspackPlugin({
-      patterns: [{ from: 'public/pdfium.wasm' }],
-    }),
-  ],
+  plugins: [],
 };

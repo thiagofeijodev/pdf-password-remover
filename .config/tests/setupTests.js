@@ -3,59 +3,10 @@
  * Configures test environment, mocks, and global test utilities
  */
 
-// Mock for @embedpdf/pdfium WebAssembly module
-jest.mock('@embedpdf/pdfium', () => ({
-  init: jest.fn(async ({ wasmBinary }) => {
-    // Mock function for adding functions to WebAssembly
-    const addFunction = jest.fn((callback, signature) => {
-      return 1; // Return a function ID
-    });
+import { TextEncoder, TextDecoder } from 'util';
 
-    const removeFunction = jest.fn((functionId) => {
-      return true;
-    });
-
-    const wasmExports = {
-      malloc: jest.fn((size) => Math.floor(Math.random() * 1000000)),
-      memory: new WebAssembly.Memory({ initial: 256, maximum: 512 }),
-      free: jest.fn(),
-    };
-
-    return {
-      pdfium: {
-        wasmExports,
-        addFunction, // Also expose at pdfium level for direct access
-        removeFunction, // Expose at pdfium level
-        PDFiumExt_Init: jest.fn(),
-        FPDF_LoadMemDocument: jest.fn((filePtr, size, password) => {
-          // Return a mock document pointer if binary is valid
-          return wasmBinary && wasmBinary.byteLength > 0 ? 12345 : null;
-        }),
-        FPDF_GetLastError: jest.fn(() => 0),
-        FPDF_GetPageCount: jest.fn((docPtr) => {
-          return docPtr ? 1 : 0;
-        }),
-        FPDF_CloseDocument: jest.fn((docPtr) => true),
-        FPDF_SaveAsCopy: jest.fn((docPtr, fileWritePtr, flags) => {
-          return true; // Return success
-        }),
-      },
-      PDFiumExt_Init: jest.fn(),
-      FPDF_LoadMemDocument: jest.fn((filePtr, size, password) => {
-        // Return a mock document pointer if binary is valid
-        return wasmBinary && wasmBinary.byteLength > 0 ? 12345 : null;
-      }),
-      FPDF_GetLastError: jest.fn(() => 0),
-      FPDF_GetPageCount: jest.fn((docPtr) => {
-        return docPtr ? 1 : 0;
-      }),
-      FPDF_CloseDocument: jest.fn((docPtr) => true),
-      FPDF_SaveAsCopy: jest.fn((docPtr, fileWritePtr, flags) => {
-        return true; // Return success
-      }),
-    };
-  }),
-}));
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 
 // Mock fetch for WebAssembly and other HTTP requests
 global.fetch = jest.fn((url) => {

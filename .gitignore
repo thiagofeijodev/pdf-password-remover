@@ -5,6 +5,8 @@
 /docs
 /dist
 /build
+/src/wasm
+/rust-pdf-remover/target
 
 # testing
 /coverage
