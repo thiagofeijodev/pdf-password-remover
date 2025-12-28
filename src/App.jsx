@@ -2,11 +2,11 @@ import { useEffect } from 'react';
 import * as styles from './App.module.css';
 import { usePDFPasswordRemover } from './hooks/usePDFPasswordRemover';
 import { createGoogleTag } from './utils/createGoogleTag';
-import { usePdfiumPDFRemover } from './hooks/usePdfiumPDFRemover';
+import { useRustPDFRemover } from './hooks/useRustPDFRemover';
 import LogoPng from '../public/logo.png';
 
 const App = () => {
-  const { processPDFWithPdfium } = usePdfiumPDFRemover();
+  const { processPDFWithRust } = useRustPDFRemover();
   const {
     password,
     isProcessing,
@@ -18,7 +18,7 @@ const App = () => {
     handlePasswordChange,
     handleSavePasswordChange,
     handleRemovePassword,
-  } = usePDFPasswordRemover(processPDFWithPdfium);
+  } = usePDFPasswordRemover(processPDFWithRust);
 
   useEffect(() => {
     createGoogleTag();
