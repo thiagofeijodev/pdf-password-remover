@@ -196,6 +196,7 @@ const config = [
       '**/package-lock.json',
       '**/pdf-remover.js',
       '**/test*.{js,ts,mjs}',
+      '**/src/wasm/**',
     ],
   },
 ];

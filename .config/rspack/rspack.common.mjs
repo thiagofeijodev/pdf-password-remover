@@ -66,6 +66,10 @@ export default {
           },
         ],
       },
+      {
+        test: /\.wasm$/,
+        type: 'asset/resource',
+      },
     ],
   },
   plugins: [],
