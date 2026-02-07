@@ -32,8 +32,8 @@ const AppContent = () => {
         </div>
       </a>
       <div className={styles.card}>
-        <img src={LogoPng} alt="PDF Password Remover Logo" className={styles.logo} />
-        <h1 className={styles.title}>PDF Password Remover</h1>
+        <img src={LogoPng} alt="File Converter Logo" className={styles.logo} />
+        <h1 className={styles.title}>File Converter</h1>
 
         <TabNav activeTab={activeTab} onChange={setActiveTab} />
 
