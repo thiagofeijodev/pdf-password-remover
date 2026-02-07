@@ -146,9 +146,8 @@ test.describe('HEIC to PNG Converter', () => {
     await expect(button).toBeDisabled();
   });
 
-  test('should convert HEIC image to PNG', async ({ page, skip }) => {
+  test('should convert HEIC image to PNG', { timeout: 90000 }, async ({ page }) => {
     const heicPath = resolve(__dirname, './assets/sample.heic');
-    skip.if(!fs.existsSync(heicPath), 'sample.heic not available');
 
     // Upload the file
     await page.setInputFiles('input[type="file"]', heicPath);
@@ -157,12 +156,14 @@ test.describe('HEIC to PNG Converter', () => {
     const fileInput = page.getByLabel(/select heic image/i);
     await expect(fileInput).toHaveValue(/sample\.heic/);
 
-    // Click the convert button
+    // Click the convert button (HEIC conversion can take a while)
     const button = page.getByRole('button', { name: /convert to png/i });
     await expect(button).toBeEnabled();
 
-    // Intercept the download after button click
-    const [download] = await Promise.all([page.waitForEvent('download'), button.click()]);
+    const [download] = await Promise.all([
+      page.waitForEvent('download', { timeout: 90000 }),
+      button.click(),
+    ]);
 
     // Wait for the download to complete
     const filePath = await download.path();
