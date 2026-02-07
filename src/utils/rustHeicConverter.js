@@ -4,16 +4,17 @@ import init, {
   convert_heic_to_png_under_size,
 } from '../wasm-heic/rust_heic_converter.js';
 
+import workerClient from './workerWasmClient';
+
 let wasmInit = null;
 
 /**
- * Initialize the HEIC converter WASM module
+ * Initialize the HEIC converter WASM module (fallback path when worker unsupported)
  */
 export const initWasm = async () => {
   if (wasmInit) return wasmInit;
 
   try {
-    // init() fetches the wasm file automatically if using --target web
     wasmInit = await init();
     init_panic_hook();
     return wasmInit;
@@ -24,11 +25,16 @@ export const initWasm = async () => {
 };
 
 /**
- * Convert HEIC image to PNG using Rust WASM
+ * Convert HEIC image to PNG using Rust WASM or worker when available
  * @param {ArrayBuffer} heicData - Raw HEIC image bytes
  * @returns {Promise<Blob>} PNG image as Blob
  */
 export const heicToPng = async (heicData) => {
+  if (workerClient && workerClient.isSupported()) {
+    const { result, mimeType } = await workerClient.processHeic(heicData);
+    return new Blob([result], { type: mimeType || 'image/png' });
+  }
+
   await initWasm();
 
   try {
@@ -43,11 +49,14 @@ export const heicToPng = async (heicData) => {
 
 /**
  * Convert HEIC to PNG and ensure result is under maxBytes by performing resizing in Rust.
- * @param {ArrayBuffer} heicData
- * @param {number} maxBytes
- * @returns {Promise<Blob>} PNG image as Blob
+ * Uses worker when available.
  */
 export const heicToPngUnderSize = async (heicData, maxBytes = 2 * 1024 * 1024) => {
+  if (workerClient && workerClient.isSupported()) {
+    const { result, mimeType } = await workerClient.processHeic(heicData, { maxBytes });
+    return new Blob([result], { type: mimeType || 'image/png' });
+  }
+
   await initWasm();
 
   try {

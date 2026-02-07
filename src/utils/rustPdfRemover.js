@@ -1,15 +1,15 @@
 import init, { remove_password, init_panic_hook } from '../wasm/rust_pdf_remover.js';
+import workerClient from './workerWasmClient';
 
 let wasmInit = null;
 
 /**
- * Initialize the Rust WebAssembly module
+ * Initialize the Rust WebAssembly module (fallback when worker unsupported)
  */
 export const initWasm = async () => {
   if (wasmInit) return wasmInit;
 
   try {
-    // init() fetches the wasm file automatically if using --target web
     wasmInit = await init();
     init_panic_hook();
     return wasmInit;
@@ -20,12 +20,14 @@ export const initWasm = async () => {
 };
 
 /**
- * Remove password from encrypted PDF using Rust WASM
- * @param {ArrayBuffer} pdfData - PDF file as ArrayBuffer
- * @param {string} password - Password to decrypt
- * @returns {Promise<Blob>} - Decrypted PDF as Blob
+ * Remove password from encrypted PDF using Rust WASM or worker when available
  */
 export const rustPdfRemover = async (pdfData, password) => {
+  if (workerClient && workerClient.isSupported()) {
+    const { result, mimeType } = await workerClient.processPdf(pdfData, password);
+    return new Blob([result], { type: mimeType || 'application/pdf' });
+  }
+
   await initWasm();
 
   try {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { initWasm, heicToPng, heicToPngUnderSize } from '../utils/rustHeicConverter';
+import workerClient from '../utils/workerWasmClient';
 
 /**
  * Hook for converting HEIC images to PNG using Rust WASM
@@ -8,6 +9,8 @@ import { initWasm, heicToPng, heicToPngUnderSize } from '../utils/rustHeicConver
 export function useRustHeicConverter() {
   const [isLoading, setIsLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [progress, setProgress] = useState(null);
+  const [progressStage, setProgressStage] = useState(null);
 
   // Initialize WASM module on component mount
   useEffect(() => {
@@ -30,6 +33,15 @@ export function useRustHeicConverter() {
     initializeWasm();
   }, []);
 
+  useEffect(() => {
+    if (!workerClient || !workerClient.isSupported()) return undefined;
+    const off = workerClient.onProgress((id, msg) => {
+      setProgress(msg.percent ?? null);
+      setProgressStage(msg.stage ?? null);
+    });
+    return off;
+  }, []);
+
   /**
    * Process HEIC image and convert to PNG
    * @param {ArrayBuffer} imageData - Raw image data
@@ -37,6 +49,8 @@ export function useRustHeicConverter() {
    */
   async function processHeicWithRust(imageData, options = {}) {
     setIsLoading(true);
+    setProgress(null);
+    setProgressStage('starting');
     try {
       console.log('[Hook] Processing HEIC image...');
       let pngBlob;
@@ -45,6 +59,7 @@ export function useRustHeicConverter() {
       } else {
         pngBlob = await heicToPng(imageData);
       }
+      setProgressStage('done');
       console.log('[Hook] HEIC conversion successful');
       return pngBlob;
     } catch (error) {
@@ -59,5 +74,7 @@ export function useRustHeicConverter() {
     isLoading,
     processHeicWithRust,
     isReady,
+    progress,
+    progressStage,
   };
 }
