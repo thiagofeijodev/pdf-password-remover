@@ -4,18 +4,21 @@
  */
 
 import { TextEncoder, TextDecoder } from 'util';
+import { Blob } from 'node:buffer';
 
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
+global.Blob = Blob;
 
 // Mock fetch for WebAssembly and other HTTP requests
 global.fetch = jest.fn((url) => {
-  // Mock pdfium.wasm request
-  if (url.includes('pdfium.wasm')) {
+  const urlStr = typeof url === 'string' ? url : url?.url || String(url);
+
+  // Mock WebAssembly requests (rust wasm modules)
+  if (urlStr.endsWith('.wasm')) {
     return Promise.resolve({
       ok: true,
       arrayBuffer: async () => {
-        // Create a minimal valid WebAssembly module binary
         const wasmModule = new Uint8Array([
           0x00,
           0x61,
@@ -30,8 +33,8 @@ global.fetch = jest.fn((url) => {
       },
     });
   }
-  // Default mock response
-  return Promise.reject(new Error(`Unmocked fetch: ${url}`));
+
+  return Promise.reject(new Error(`Unmocked fetch: ${urlStr}`));
 });
 
 // Mock URL.createObjectURL and URL.revokeObjectURL
@@ -75,6 +78,25 @@ const localStorageMock = {
 
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
+});
+
+// Prevent WASM initialization during tests by mocking hooks that call initWasm
+jest.mock('../../src/hooks/useRustPDFRemover', () => {
+  const useRustPDFRemover = jest.fn(() => ({
+    processPDFWithRust: jest.fn(async () => new Blob(['pdf'], { type: 'application/pdf' })),
+    isLoading: false,
+    isReady: true,
+  }));
+  return { useRustPDFRemover };
+});
+
+jest.mock('../../src/hooks/useRustHeicConverter', () => {
+  const useRustHeicConverter = jest.fn(() => ({
+    processHeicWithRust: jest.fn(async () => new Blob(['png'], { type: 'image/png' })),
+    isReady: true,
+    isLoading: false,
+  }));
+  return { useRustHeicConverter };
 });
 
 // Suppress console output during tests (optional)

@@ -1,17 +1,14 @@
-/**
- * Unit tests for App component
- * Tests file input, password input, form submission, and error states
- */
-
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 
-// Mock the hooks
-jest.mock('./hooks/useRustPDFRemover');
-jest.mock('./hooks/usePDFPasswordRemover');
 jest.mock('./utils/createGoogleTag');
 jest.mock('../public/logo.png', () => 'logo.png');
+
+// Mock the password remover hook locally for these component tests
+jest.mock('./hooks/usePDFPasswordRemover', () => ({
+  usePDFPasswordRemover: jest.fn(),
+}));
 
 describe('App Component', () => {
   const mockUseRustPDFRemover = require('./hooks/useRustPDFRemover').useRustPDFRemover;

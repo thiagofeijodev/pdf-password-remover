@@ -48,7 +48,8 @@ pub fn convert_heic_to_png_under_size(image_data: &[u8], max_bytes: usize) -> Re
     let mut width = dyn_img.width();
     let mut height = dyn_img.height();
 
-    for _ in 0..8 {
+    // Keep iterating until under size or until image dims reach 1px
+    for _ in 0..50 {
         // Convert to RGBA8 bytes
         let rgba = dyn_img.to_rgba8();
         let rgba_buf = rgba.into_raw();
@@ -75,13 +76,15 @@ pub fn convert_heic_to_png_under_size(image_data: &[u8], max_bytes: usize) -> Re
         }
 
         // Need to downscale: reduce by factor
-        let new_w = ((width as f32) * 0.85).max(1.0) as u32;
-        let new_h = ((height as f32) * 0.85).max(1.0) as u32;
+        let new_w = ((width as f32) * 0.75).max(1.0) as u32;
+        let new_h = ((height as f32) * 0.75).max(1.0) as u32;
         if new_w >= width && new_h >= height { break; }
         let resized = image::imageops::resize(&dyn_img.to_rgba8(), new_w, new_h, FilterType::Lanczos3);
         dyn_img = image::DynamicImage::ImageRgba8(resized);
         width = dyn_img.width();
         height = dyn_img.height();
+        // if we've reached 1px in any dimension, stop to avoid infinite loop
+        if width <= 1 || height <= 1 { break; }
     }
 
     // If we exit loop without meeting size, return last produced PNG (possibly > max_bytes)
