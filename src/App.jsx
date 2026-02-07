@@ -3,7 +3,7 @@ import * as styles from './App.module.css';
 import { createGoogleTag } from './utils/createGoogleTag';
 import LogoPng from '../public/logo.png';
 
-import { ProcessingProvider } from './context/processingContext';
+import { ProcessingProvider } from './context/ProcessingProvider';
 import TabNav from './components/TabNav';
 import PDFRemoverForm from './components/PDFRemoverForm';
 import HeicConverterForm from './components/HeicConverterForm';

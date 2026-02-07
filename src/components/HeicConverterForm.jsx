@@ -47,10 +47,6 @@ const HeicConverterForm = () => {
           />{' '}
           Resize and compress to be smaller than 2MB
         </label>
-
-        <div style={{ marginTop: 8 }}>
-          Output will be PNG. The Rust converter will resize as needed to meet the size limit.
-        </div>
       </div>
       {heicSuccessMessage && <div className={styles.success}>{heicSuccessMessage}</div>}
 
