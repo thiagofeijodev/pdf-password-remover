@@ -89,6 +89,7 @@ export const usePDFPasswordRemover = (processPDF) => {
 
     setIsProcessing(true);
     setError('');
+    setSuccessMessage('');
 
     try {
       // create PDF.js document object with password

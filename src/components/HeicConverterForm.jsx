@@ -29,6 +29,7 @@ const HeicConverterForm = () => {
 
     setIsProcessingHeic(true);
     setHeicError('');
+    setHeicSuccessMessage('');
 
     try {
       const imageBuffer = await createPDFBuffer(heicFile);
