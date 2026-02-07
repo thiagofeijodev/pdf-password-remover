@@ -2,7 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import LoadingSpinner from './LoadingSpinner';
-import { ProcessingProvider, useProcessing } from '../context/ProcessingContext';
+import { ProcessingProvider } from '../context/ProcessingContext';
+import { useProcessing } from '../hooks/useProcessing';
 
 describe('LoadingSpinner', () => {
   const TestComponent = ({ onMount }) => {

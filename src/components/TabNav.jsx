@@ -1,5 +1,5 @@
 import * as styles from '../App.module.css';
-import { useProcessing } from '../context/ProcessingContext';
+import { useProcessing } from '../hooks/useProcessing';
 
 const TabNav = ({ activeTab, onChange }) => {
   const { isProcessing } = useProcessing();

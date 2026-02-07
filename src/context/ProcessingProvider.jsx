@@ -1,6 +1,5 @@
-import { createContext, useContext, useState } from 'react';
-
-const ProcessingContext = createContext();
+import { useState } from 'react';
+import { ProcessingContext } from './index';
 
 export const ProcessingProvider = ({ children }) => {
   const [isPDFProcessing, setIsPDFProcessing] = useState(false);
@@ -21,12 +20,4 @@ export const ProcessingProvider = ({ children }) => {
       {children}
     </ProcessingContext.Provider>
   );
-};
-
-export const useProcessing = () => {
-  const context = useContext(ProcessingContext);
-  if (!context) {
-    throw new Error('useProcessing must be used within a ProcessingProvider');
-  }
-  return context;
 };

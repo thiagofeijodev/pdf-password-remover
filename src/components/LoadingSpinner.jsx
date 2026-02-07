@@ -1,4 +1,4 @@
-import { useProcessing } from '../context/ProcessingContext';
+import { useProcessing } from '../hooks/useProcessing';
 import * as styles from './LoadingSpinner.module.css';
 
 export default function LoadingSpinner() {

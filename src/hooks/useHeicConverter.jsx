@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useRustHeicConverter } from './useRustHeicConverter';
 import { createPDFBuffer } from '../utils/createPDFBuffer';
 import { downloadBlob } from '../utils/downloadBlob';
-import { useProcessing } from '../context/ProcessingContext';
+import { useProcessing } from './useProcessing';
 
 export const useHeicConverter = () => {
   const [heicFile, setHeicFile] = useState(null);

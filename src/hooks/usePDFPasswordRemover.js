@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { createPDFBuffer } from '../utils/createPDFBuffer';
 import { downloadBlob } from '../utils/downloadBlob';
-import { useProcessing } from '../context/ProcessingContext';
+import { useProcessing } from './useProcessing';
 
 const STORAGE_KEY = 'pdfPasswordRemover_data';
 
 export const usePDFPasswordRemover = (processPDF) => {
-  const { isProcessingPDF, setIsPDFProcessing } = useProcessing();
+  const { isPDFProcessing, setIsPDFProcessing } = useProcessing();
   const [file, setFile] = useState(null);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -117,7 +117,7 @@ export const usePDFPasswordRemover = (processPDF) => {
   return {
     file,
     password,
-    isProcessingPDF,
+    isProcessing: isPDFProcessing,
     successMessage,
     error,
     fileName,
