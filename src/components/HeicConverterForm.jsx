@@ -28,7 +28,7 @@ const HeicConverterForm = () => {
           accept=".heic,.heif,image/heic,image/heif"
           onChange={handleHeicFileChange}
           className={styles.fileInput}
-          disabled={isProcessingHeic}
+          disabled={isHeicProcessing}
         />
         {heicFileName && (
           <div className={styles.fileName}>
@@ -58,10 +58,10 @@ const HeicConverterForm = () => {
 
       <button
         onClick={handleConvertHeic}
-        disabled={isProcessingHeic || !heicFile}
+        disabled={isHeicProcessing || !heicFile}
         className={styles.button}
       >
-        {isProcessingHeic ? 'Converting...' : 'Convert to PNG & Download'}
+        {isHeicProcessing ? 'Converting...' : 'Convert to PNG & Download'}
       </button>
     </div>
   );

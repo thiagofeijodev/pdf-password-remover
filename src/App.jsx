@@ -3,12 +3,14 @@ import * as styles from './App.module.css';
 import { createGoogleTag } from './utils/createGoogleTag';
 import LogoPng from '../public/logo.png';
 
+import { ProcessingProvider } from './context/ProcessingContext';
 import TabNav from './components/TabNav';
 import PDFRemoverForm from './components/PDFRemoverForm';
 import HeicConverterForm from './components/HeicConverterForm';
 import InfoFooter from './components/InfoFooter';
+import LoadingSpinner from './components/LoadingSpinner';
 
-const App = () => {
+const AppContent = () => {
   const [activeTab, setActiveTab] = useState('pdf');
 
   useEffect(() => {
@@ -39,6 +41,7 @@ const App = () => {
 
         {activeTab === 'heic' && <HeicConverterForm />}
 
+        <LoadingSpinner />
         <InfoFooter />
       </div>
       <footer className={styles.footer}>
@@ -50,5 +53,11 @@ const App = () => {
     </div>
   );
 };
+
+const App = () => (
+  <ProcessingProvider>
+    <AppContent />
+  </ProcessingProvider>
+);
 
 export default App;

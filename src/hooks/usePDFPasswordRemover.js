@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { createPDFBuffer } from '../utils/createPDFBuffer';
 import { downloadBlob } from '../utils/downloadBlob';
+import { useProcessing } from '../context/ProcessingContext';
 
 const STORAGE_KEY = 'pdfPasswordRemover_data';
 
 export const usePDFPasswordRemover = (processPDF) => {
+  const { isProcessingPDF, setIsPDFProcessing } = useProcessing();
   const [file, setFile] = useState(null);
   const [password, setPassword] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [fileName, setFileName] = useState('');
@@ -87,7 +88,7 @@ export const usePDFPasswordRemover = (processPDF) => {
       return;
     }
 
-    setIsProcessing(true);
+    setIsPDFProcessing(true);
     setError('');
     setSuccessMessage('');
 
@@ -102,9 +103,9 @@ export const usePDFPasswordRemover = (processPDF) => {
       downloadBlob(newPdf, fileName);
 
       setSuccessMessage(`Password removed successfully! File downloaded: ${fileName}`);
-      setIsProcessing(false);
+      setIsPDFProcessing(false);
     } catch (err) {
-      setIsProcessing(false);
+      setIsPDFProcessing(false);
       if (err.message.includes('password') || err.message.includes('PasswordException')) {
         setError('Incorrect password. Please try again.');
       } else {
@@ -116,7 +117,7 @@ export const usePDFPasswordRemover = (processPDF) => {
   return {
     file,
     password,
-    isProcessing,
+    isProcessingPDF,
     successMessage,
     error,
     fileName,
