@@ -26,6 +26,18 @@ const App = () => {
 
   return (
     <div className={styles.container}>
+      <a
+        href="https://github.com/thiagofeijodev/pdf-password-remover"
+        className={styles.forkLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Fork on GitHub"
+      >
+        <div className={styles.forkLabelWrapper}>
+          <span>Fork</span>
+          <span>on GitHub</span>
+        </div>
+      </a>
       <div className={styles.card}>
         <img src={LogoPng} alt="PDF Password Remover Logo" className={styles.logo} />
         <h1 className={styles.title}>PDF Password Remover</h1>
