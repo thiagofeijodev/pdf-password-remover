@@ -100,7 +100,12 @@ const App = () => {
         <div className={styles.info}>
           <p>🔒 All processing is done in your browser</p>
           <p>📁 Your files never leave your device</p>
-          <p>⚙️ Built with WebAssembly & PDFium</p>
+          <p>
+            ⚙️ Built with WebAssembly & Rust &{' '}
+            <a href="https://docs.rs/lopdf/latest/lopdf/" target="_blank">
+              lopdf
+            </a>
+          </p>
         </div>
       </div>
       <footer className={styles.footer}>
