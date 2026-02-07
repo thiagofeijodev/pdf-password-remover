@@ -1,107 +1,183 @@
 # PDF Password Remover
 
-A privacy-focused web application for removing password protection from PDF files. Upload a password-protected PDF, enter the password, and download an unlocked version. All processing happens entirely in your browser — your files never leave your device. Perfect for removing passwords from your own PDFs.
+A privacy-focused web application for removing password protection from PDF files. Upload a password-protected PDF, enter the password, and download an unlocked version. All processing happens entirely in your browser — files never leave your device.
 
-## 🔧 Development Setup
+## Quick Summary
 
-To run this project locally, follow these steps:
+- Dev server: http://localhost:3001/ (configured in `.config/rspack/rspack.dev.mjs`)
+- WASM: built from `rust-pdf-remover` with `wasm-pack` into `src/wasm` (prebuilt artifacts exist in the repo)
+- Production build output: `docs/` (published by CI to GitHub Pages)
 
-1. **Clone the repository:**
+## Prerequisites
 
-   ```bash
-   git clone https://github.com/thiagofeijodev/pdf-password-remover.git
-   cd pdf-password-remover
-   ```
+- Node >= 24 (CI uses Node 24)
+- npm
+- Rust toolchain (if you plan to build the wasm locally)
+- `wasm-pack` (recommended for local wasm builds)
 
-2. **Install dependencies:**
-
-   ```bash
-   npm install
-   ```
-
-3. **Run the development server:**
-
-   ```bash
-   npm start
-   ```
-
-   The application will be available at `http://localhost:3000`.
-
-## 🧪 Running Tests
-
-This project includes unit tests and end-to-end tests. Here's how to run them:
-
-### Unit Tests
-
-To execute the unit test suite using Jest:
+Install `wasm-pack`:
 
 ```bash
-npm test
+curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 ```
 
-This runs all tests in the `src/` directory with a maximum of 2 concurrent workers.
+Note: the repository includes prebuilt WASM artifacts in `src/wasm`. If you prefer not to install `wasm-pack`, you can use those artifacts, but the `npm start` script runs a wasm build step by default (see Development section).
 
-### End-to-End Tests
-
-Before running Playwright tests for the first time, install the required dependencies:
+## Installation
 
 ```bash
-npm run test:prepare
+git clone https://github.com/thiagofeijodev/pdf-password-remover.git
+cd pdf-password-remover
+npm ci
 ```
 
-Then, to run the Playwright e2e test suite:
+## Development
+
+Start the dev server (this runs a wasm dev build first):
 
 ```bash
-npm run test:e2e
+npm start
 ```
 
-To run e2e tests in UI mode (interactive):
+What `npm start` does:
+
+- Runs `npm run build:wasm:dev` (calls `wasm-pack` to build the Rust crate into `src/wasm` in dev mode)
+- Starts the Rspack dev server via `node .config/rspack/rspack.dev.mjs`
+
+Dev server details:
+
+- Port: `3001`
+- Static output during dev: `static/`
+
+Advanced: skip the wasm-pack step (if `src/wasm` is already built):
 
 ```bash
-npm run test:e2e:ui
+node .config/rspack/rspack.dev.mjs
 ```
 
-### Running All Tests
+## Building (WASM + Production)
 
-To run both unit and e2e tests locally:
+Build the Rust crate to WASM (release):
 
 ```bash
-npm test && npm run test:e2e
+npm run build:wasm
 ```
 
-### Test in CI Environment
-
-For continuous integration pipelines, use:
-
-```bash
-npm run test:ci        # Runs Jest with JSON output for CI
-npm run test:e2e:ci    # Runs Playwright in CI mode
-```
-
-## 📦 Build for Production
-
-To create a production-ready build:
+Build the full production site (includes wasm build):
 
 ```bash
 npm run build
 ```
 
-The optimized assets will be available in the `dist/` directory.
+Notes:
 
-## 🌐 Deployment
+- `build:wasm` uses `wasm-pack build --target web --out-dir ../src/wasm --release rust-pdf-remover`.
+- Production output is written to `docs/` (this is what CI publishes to GitHub Pages).
+- Ensure `.wasm` files are served with `application/wasm` MIME type for best performance (enables `WebAssembly.instantiateStreaming`). The wasm JS includes a fallback to a slower instantiate if needed.
 
-This application is deployed using GitHub Pages. After pushing changes to the `main` branch, GitHub Pages will automatically update the live site.
+## Tests
 
-## 🤝 Contributing
+### Unit tests (Jest)
 
-Contributions are welcome! If you have suggestions or improvements, please fork the repository and submit a pull request.
+```bash
+npm test
+```
 
-## 📄 License
+CI-friendly Jest JSON output:
+
+```bash
+npm run test:ci
+```
+
+### E2E tests (Playwright)
+
+Install Playwright browsers:
+
+```bash
+npm run test:prepare
+```
+
+Run Playwright tests:
+
+```bash
+npm run test:e2e
+```
+
+Interactive UI mode:
+
+```bash
+npm run test:e2e:ui
+```
+
+Notes:
+
+- Playwright's config will start the dev server on port `3001` unless `APP_URL` is set.
+- In CI Playwright runs with `CI=1` and may run multiple browser projects.
+
+## Continuous Integration & Deployment
+
+The GitHub Actions workflow is in `.github/workflows/main.yml` and runs on pushes to `main`. Key steps:
+
+- Setup Node (Node 24) and cache `npm`
+- Install `wasm-pack` (installer script)
+- `npm ci`
+- `npm run build:wasm`
+- `npm run lint`
+- `npm run test` (Jest)
+- `npm run test:prepare` (Playwright browsers)
+- `npm run test:e2e:ci` (Playwright)
+- `npm run build` (production)
+- Deploy `./docs` to `gh-pages` via `peaceiris/actions-gh-pages`
+
+CI notes:
+
+- `REACT_APP_GA_ID` is read from secrets during the production build when analytics are desired.
+
+## Files of Interest
+
+- `src/wasm/` — prebuilt wasm-bindgen artifacts (JS + .wasm + types)
+- `rust-pdf-remover/` — Rust crate to build wasm
+- `.config/rspack/rspack.dev.mjs` — dev server configuration (port 3001)
+- `.config/rspack/rspack.prod.mjs` — production build configuration (writes to `docs/`)
+- `.github/workflows/main.yml` — CI (build/test/deploy)
+
+## Troubleshooting & Common Pitfalls
+
+- wasm-pack not installed: `npm start` runs `build:wasm:dev` and will fail without `wasm-pack`. Install `wasm-pack` or use the prebuilt `src/wasm` and start the dev server directly.
+- MIME type: ensure servers serve `.wasm` files using `application/wasm` to enable fast streaming instantiation.
+- Node/npm versions: CI uses Node 24; if you get unexpected failures, try Node 24.
+- Playwright: run `npm run test:prepare` locally to install browsers before running e2e tests.
+- Prebuilt wasm: running `npm run build:wasm` will overwrite `src/wasm` with freshly built artifacts from the Rust crate.
+
+## Quick Commands
+
+```bash
+# Install deps
+npm ci
+
+# Start dev (builds wasm in dev mode first)
+npm start
+
+# Build wasm (release)
+npm run build:wasm
+
+# Build production
+npm run build
+
+# Run unit tests
+npm test
+
+# Prepare Playwright browsers
+npm run test:prepare
+
+# Run e2e tests
+npm run test:e2e
+```
+
+## License
 
 This project is licensed under the MIT License.
 
-## 📬 Contact
+## Contact
 
-Feel free to connect with me on [LinkedIn](https://www.linkedin.com/in/thiagofeijodev).
-
----
+For questions, issues or contributions: https://github.com/thiagofeijodev/pdf-password-remover
