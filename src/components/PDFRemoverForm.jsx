@@ -9,6 +9,7 @@ const PDFRemoverForm = () => {
     password,
     isProcessing,
     error,
+    successMessage,
     fileName,
     savePassword,
     handleFileChange,
@@ -76,6 +77,7 @@ const PDFRemoverForm = () => {
       </div>
 
       {error && <div className={styles.error}>{error}</div>}
+      {successMessage && <div className={styles.success}>{successMessage}</div>}
 
       <button
         onClick={handleRemovePassword}

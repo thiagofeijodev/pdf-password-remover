@@ -9,6 +9,7 @@ const HeicConverterForm = () => {
   const [heicFileName, setHeicFileName] = useState('');
   const [isProcessingHeic, setIsProcessingHeic] = useState(false);
   const [heicError, setHeicError] = useState('');
+  const [heicSuccessMessage, setHeicSuccessMessage] = useState('');
   const [compressToUnder2MB, setCompressToUnder2MB] = useState(false);
 
   const { processHeicWithRust } = useRustHeicConverter();
@@ -19,6 +20,7 @@ const HeicConverterForm = () => {
       setHeicFile(selectedFile);
       setHeicFileName(selectedFile.name);
       setHeicError('');
+      setHeicSuccessMessage('');
     }
   };
 
@@ -42,7 +44,9 @@ const HeicConverterForm = () => {
         else if (outBlob.type.includes('jpeg') || outBlob.type.includes('jpg')) ext = '.jpg';
         else if (outBlob.type.includes('png')) ext = '.png';
       }
-      downloadBlob(outBlob, `${baseName}${ext}`);
+      const outputFileName = `${baseName}${ext}`;
+      downloadBlob(outBlob, outputFileName);
+      setHeicSuccessMessage(`Image converted successfully! File downloaded: ${outputFileName}`);
     } catch (err) {
       const errorMessage = err.message || 'Failed to convert HEIC to PNG';
       setHeicError(errorMessage);
@@ -90,6 +94,7 @@ const HeicConverterForm = () => {
           Output will be PNG. The Rust converter will resize as needed to meet the size limit.
         </div>
       </div>
+      {heicSuccessMessage && <div className={styles.success}>{heicSuccessMessage}</div>}
 
       {heicError && <div className={styles.error}>{heicError}</div>}
 

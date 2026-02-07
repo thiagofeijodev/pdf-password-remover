@@ -9,6 +9,7 @@ export const usePDFPasswordRemover = (processPDF) => {
   const [password, setPassword] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [fileName, setFileName] = useState('');
   const [savePassword, setSavePassword] = useState(true);
 
@@ -38,6 +39,7 @@ export const usePDFPasswordRemover = (processPDF) => {
       setFile(selectedFile);
       setFileName(selectedFile.name);
       setError('');
+      setSuccessMessage('');
     }
   };
 
@@ -98,6 +100,7 @@ export const usePDFPasswordRemover = (processPDF) => {
       // download the new PDF without password
       downloadBlob(newPdf, fileName);
 
+      setSuccessMessage(`Password removed successfully! File downloaded: ${fileName}`);
       setIsProcessing(false);
     } catch (err) {
       setIsProcessing(false);
@@ -113,6 +116,7 @@ export const usePDFPasswordRemover = (processPDF) => {
     file,
     password,
     isProcessing,
+    successMessage,
     error,
     fileName,
     savePassword,
