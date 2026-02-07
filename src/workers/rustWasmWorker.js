@@ -9,7 +9,9 @@ const cancelled = new Set();
 try {
   console.log('[rustWasmWorker] worker started');
   self.postMessage({ type: 'worker-started' });
-} catch (e) {}
+} catch {
+  // Ignore if we can't post (e.g. if parent has gone away)
+}
 
 async function ensureHeic() {
   if (heic) return heic;
@@ -20,14 +22,18 @@ async function ensureHeic() {
     if (mod.init_panic_hook) {
       try {
         mod.init_panic_hook();
-      } catch (e) {}
+      } catch {
+        // Ignore if we can't post (e.g. if parent has gone away)
+      }
     }
     heic = mod;
     return heic;
   } catch (err) {
     try {
       self.postMessage({ type: 'error', error: `HEIC import failed: ${String(err)}` });
-    } catch (e) {}
+    } catch {
+      // Ignore if we can't post (e.g. if parent has gone away)
+    }
     throw err;
   }
 }
@@ -40,14 +46,18 @@ async function ensurePdf() {
     if (mod.init_panic_hook) {
       try {
         mod.init_panic_hook();
-      } catch (e) {}
+      } catch {
+        // Ignore if we can't post (e.g. if parent has gone away)
+      }
     }
     pdf = mod;
     return pdf;
   } catch (err) {
     try {
       self.postMessage({ type: 'error', error: `PDF import failed: ${String(err)}` });
-    } catch (e) {}
+    } catch {
+      // Ignore if we can't post (e.g. if parent has gone away)
+    }
     throw err;
   }
 }
@@ -116,6 +126,8 @@ self.onmessage = async (ev) => {
   } catch (err) {
     try {
       self.postMessage({ type: 'error', id, error: String(err) });
-    } catch (e) {}
+    } catch {
+      // Ignore if we can't post (e.g. if parent has gone away)
+    }
   }
 };
