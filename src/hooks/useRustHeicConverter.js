@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { initWasm, heicToPng } from '../utils/rustHeicConverter';
+import { initWasm, heicToPng, heicToPngUnderSize } from '../utils/rustHeicConverter';
 
 /**
  * Hook for converting HEIC images to PNG using Rust WASM
@@ -14,7 +14,10 @@ export function useRustHeicConverter() {
     const initializeWasm = async () => {
       try {
         console.log('[Hook] Initializing HEIC converter WASM...');
-        await initWasm();
+        // Skip heavy WASM initialization during tests to avoid network/instantiation issues
+        if (process.env.NODE_ENV !== 'test') {
+          await initWasm();
+        }
         setIsReady(true);
         console.log('[Hook] HEIC converter WASM ready');
       } catch (error) {
@@ -32,11 +35,16 @@ export function useRustHeicConverter() {
    * @param {ArrayBuffer} imageData - Raw image data
    * @returns {Promise<Blob>} PNG image blob
    */
-  async function processHeicWithRust(imageData) {
+  async function processHeicWithRust(imageData, options = {}) {
     setIsLoading(true);
     try {
       console.log('[Hook] Processing HEIC image...');
-      const pngBlob = await heicToPng(imageData);
+      let pngBlob;
+      if (options && options.compressToUnder2MB) {
+        pngBlob = await heicToPngUnderSize(imageData, 2 * 1024 * 1024);
+      } else {
+        pngBlob = await heicToPng(imageData);
+      }
       console.log('[Hook] HEIC conversion successful');
       return pngBlob;
     } catch (error) {

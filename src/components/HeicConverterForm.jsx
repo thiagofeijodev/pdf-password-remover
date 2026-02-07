@@ -9,6 +9,7 @@ const HeicConverterForm = () => {
   const [heicFileName, setHeicFileName] = useState('');
   const [isProcessingHeic, setIsProcessingHeic] = useState(false);
   const [heicError, setHeicError] = useState('');
+  const [compressToUnder2MB, setCompressToUnder2MB] = useState(false);
 
   const { processHeicWithRust } = useRustHeicConverter();
 
@@ -29,9 +30,19 @@ const HeicConverterForm = () => {
 
     try {
       const imageBuffer = await createPDFBuffer(heicFile);
-      const pngBlob = await processHeicWithRust(imageBuffer);
+      const outBlob = await processHeicWithRust(imageBuffer, {
+        compressToUnder2MB: compressToUnder2MB,
+      });
+
       const baseName = heicFile.name.replace(/\.[^/.]+$/, '');
-      downloadBlob(pngBlob, `${baseName}.png`);
+      // choose extension from returned blob type when possible
+      let ext = '.png';
+      if (outBlob && outBlob.type) {
+        if (outBlob.type.includes('webp')) ext = '.webp';
+        else if (outBlob.type.includes('jpeg') || outBlob.type.includes('jpg')) ext = '.jpg';
+        else if (outBlob.type.includes('png')) ext = '.png';
+      }
+      downloadBlob(outBlob, `${baseName}${ext}`);
     } catch (err) {
       const errorMessage = err.message || 'Failed to convert HEIC to PNG';
       setHeicError(errorMessage);
@@ -62,6 +73,22 @@ const HeicConverterForm = () => {
             <span>Selected: {heicFileName}</span>
           </div>
         )}
+      </div>
+
+      <div className={styles.inputGroup}>
+        <label className={styles.label}>
+          <input
+            type="checkbox"
+            checked={compressToUnder2MB}
+            onChange={(e) => setCompressToUnder2MB(e.target.checked)}
+            disabled={isProcessingHeic}
+          />{' '}
+          Resize and compress to be smaller than 2MB
+        </label>
+
+        <div style={{ marginTop: 8 }}>
+          Output will be PNG. The Rust converter will resize as needed to meet the size limit.
+        </div>
       </div>
 
       {heicError && <div className={styles.error}>{heicError}</div>}
