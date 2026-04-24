@@ -1,44 +1,10 @@
 // Worker client that communicates with src/workers/rustWasmWorker.js
 const SUPPORTS_WORKER = typeof Worker !== 'undefined';
-const USE_WORKER_STORAGE_KEY = 'pdfPasswordRemover_useWorker';
 
 const pending = new Map();
 const progressListeners = new Set();
 
 let worker = null;
-let useWorkerPreference = null;
-
-function getUseWorkerFromStorage() {
-  try {
-    const stored = localStorage.getItem(USE_WORKER_STORAGE_KEY);
-    if (stored === null) return true;
-    return stored === 'true';
-  } catch {
-    return true;
-  }
-}
-
-export function getUseWorker() {
-  if (useWorkerPreference === null) {
-    useWorkerPreference = getUseWorkerFromStorage();
-  }
-  return useWorkerPreference;
-}
-
-export function setUseWorker(value) {
-  const next = !!value;
-  useWorkerPreference = next;
-  try {
-    localStorage.setItem(USE_WORKER_STORAGE_KEY, String(next));
-  } catch {
-    // ignore storage errors
-  }
-  if (!next && worker) {
-    worker.terminate();
-    worker = null;
-    rejectAllPending(new Error('Worker disabled by user'));
-  }
-}
 
 function rejectAllPending(err) {
   for (const [id, { reject }] of pending.entries()) {
@@ -52,7 +18,7 @@ function rejectAllPending(err) {
 }
 
 function ensureWorker() {
-  if (!SUPPORTS_WORKER || !getUseWorker()) return null;
+  if (!SUPPORTS_WORKER) return null;
   if (worker) return worker;
   // Use bundler-friendly worker creation
   try {
@@ -143,7 +109,7 @@ function makeId() {
 }
 
 export function isSupported() {
-  return SUPPORTS_WORKER && getUseWorker();
+  return SUPPORTS_WORKER;
 }
 
 export function onProgress(cb) {
@@ -190,8 +156,6 @@ export function cancel(id) {
 
 export default {
   isSupported,
-  getUseWorker,
-  setUseWorker,
   onProgress,
   processHeic,
   processPdf,

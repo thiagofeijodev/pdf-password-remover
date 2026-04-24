@@ -10,13 +10,10 @@ test.describe('PDF Password Remover App', () => {
 
   test('should display the PDF password remover interface', async ({ page }) => {
     // Check for main title
-    await expect(page.getByRole('heading', { name: /file converter/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /pdf password remover/i })).toBeVisible();
 
-    // Check for PDF tab
-    await expect(page.getByRole('button', { name: /pdf password remover/i })).toBeVisible();
-
-    // Check for HEIC tab
-    await expect(page.getByRole('button', { name: /heic to png/i })).toBeVisible();
+    // Check for subtitle
+    await expect(page.getByText(/upload a password-protected pdf/i)).toBeVisible();
 
     // Check for file input
     await expect(page.getByLabel(/select pdf file/i)).toBeVisible();
@@ -131,7 +128,7 @@ test.describe('HEIC to PNG Converter', () => {
     await page.goto('/');
 
     // Switch to HEIC tab
-    await page.getByRole('button', { name: /heic to png/i }).click();
+    await page.getByRole('img').click();
   });
 
   test('should display HEIC to PNG converter interface', async ({ page }) => {
@@ -186,11 +183,11 @@ test.describe('HEIC to PNG Converter', () => {
     await expect(page.getByLabel(/select heic image/i)).toBeVisible();
 
     // Switch to PDF tab
-    await page.getByRole('button', { name: /pdf password remover/i }).click();
+    await page.getByRole('img').click();
     await expect(page.getByLabel(/select pdf file/i)).toBeVisible();
 
     // Switch back to HEIC tab
-    await page.getByRole('button', { name: /heic to png/i }).click();
+    await page.getByRole('img').click();
     await expect(page.getByLabel(/select heic image/i)).toBeVisible();
   });
 });

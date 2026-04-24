@@ -44,13 +44,13 @@ describe('App Component', () => {
   describe('Rendering', () => {
     it('should render the main app container', () => {
       render(<App />);
-      expect(screen.getByAltText('File Converter Logo')).toBeInTheDocument();
+      expect(screen.getByAltText('PDF Password Remover Logo')).toBeInTheDocument();
     });
 
     it('should render the title', () => {
       render(<App />);
       expect(
-        screen.getByRole('heading', { level: 1, name: /File Converter/i }),
+        screen.getByRole('heading', { level: 1, name: /PDF Password Remover/i }),
       ).toBeInTheDocument();
     });
 
