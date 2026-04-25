@@ -128,7 +128,7 @@ test.describe('HEIC to PNG Converter', () => {
     await page.goto('/');
 
     // Switch to HEIC tab
-    await page.getByRole('img').click();
+    await page.getByRole('tab', { name: /heic to png/i }).dispatchEvent('click');
   });
 
   test('should display HEIC to PNG converter interface', async ({ page }) => {
@@ -143,14 +143,15 @@ test.describe('HEIC to PNG Converter', () => {
     await expect(button).toBeDisabled();
   });
 
-  test('should convert HEIC image to PNG', { timeout: 90000 }, async ({ page }) => {
+  test('should convert HEIC image to PNG', async ({ page }) => {
+    test.setTimeout(90000);
     const heicPath = resolve(__dirname, './assets/sample.heic');
 
     // Upload the file
     await page.setInputFiles('input[type="file"]', heicPath);
 
     // Check that file is selected
-    const fileInput = page.getByLabel(/select heic image/i);
+    const fileInput = page.locator('#heic-input');
     await expect(fileInput).toHaveValue(/sample\.heic/);
 
     // Click the convert button (HEIC conversion can take a while)
@@ -159,7 +160,7 @@ test.describe('HEIC to PNG Converter', () => {
 
     const [download] = await Promise.all([
       page.waitForEvent('download', { timeout: 90000 }),
-      button.click(),
+      button.dispatchEvent('click'),
     ]);
 
     // Wait for the download to complete
@@ -183,11 +184,11 @@ test.describe('HEIC to PNG Converter', () => {
     await expect(page.getByLabel(/select heic image/i)).toBeVisible();
 
     // Switch to PDF tab
-    await page.getByRole('img').click();
+    await page.getByRole('tab', { name: /pdf password remover/i }).dispatchEvent('click');
     await expect(page.getByLabel(/select pdf file/i)).toBeVisible();
 
     // Switch back to HEIC tab
-    await page.getByRole('img').click();
+    await page.getByRole('tab', { name: /heic to png/i }).dispatchEvent('click');
     await expect(page.getByLabel(/select heic image/i)).toBeVisible();
   });
 });

@@ -129,7 +129,7 @@ self.onmessage = async (ev) => {
       // Optional: pre-load requested module(s)
       if (msg.module === 'heic') await ensureHeic();
       if (msg.module === 'pdf') await ensurePdf();
-      return self.postMessage({ type: 'ready' });
+      return self.postMessage({ type: 'ready', id });
     }
   } catch (err) {
     try {

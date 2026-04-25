@@ -1,12 +1,43 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { heicToPng, heicToPngUnderSize } from '../utils/rustHeicConverter';
+import { preloadHeicDecoder } from '../utils/libheifConverter';
 
 /**
- * Hook for converting HEIC images to PNG using Rust WASM
- * Manages WASM initialization and provides image conversion functionality
+ * Hook for converting HEIC images in the browser using libheif
  */
 export function useRustHeicConverter() {
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const warmDecoder = async () => {
+      try {
+        await preloadHeicDecoder();
+      } catch (err) {
+        if (!cancelled) {
+          console.warn('[Hook] Failed to prewarm HEIC decoder:', err);
+        }
+      }
+    };
+
+    const idleCallback =
+      typeof window.requestIdleCallback === 'function'
+        ? window.requestIdleCallback(() => {
+            void warmDecoder();
+          })
+        : window.setTimeout(() => {
+            void warmDecoder();
+          }, 0);
+
+    return () => {
+      cancelled = true;
+      if (typeof window.cancelIdleCallback === 'function') {
+        window.cancelIdleCallback(idleCallback);
+      } else {
+        window.clearTimeout(idleCallback);
+      }
+    };
+  }, []);
 
   /**
    * Process HEIC image and convert to PNG

@@ -4,6 +4,7 @@ import { createGoogleTag } from './utils/createGoogleTag';
 import LogoPng from '../public/logo.png';
 
 import { ProcessingProvider } from './context/ProcessingProvider';
+import TabNav from './components/TabNav';
 import PDFRemoverForm from './components/PDFRemoverForm';
 import HeicConverterForm from './components/HeicConverterForm';
 import InfoFooter from './components/InfoFooter';
@@ -31,16 +32,13 @@ const AppContent = () => {
         </div>
       </a>
       <div className={styles.card}>
-        <img
-          src={LogoPng}
-          alt="PDF Password Remover Logo"
-          className={styles.logo}
-          onClick={() => setActiveTab((prev) => (prev === 'pdf' ? 'heic' : 'pdf'))}
-        />
+        <img src={LogoPng} alt="PDF Password Remover Logo" className={styles.logo} />
 
         <h1 className={styles.title}>
           {activeTab === 'pdf' ? <>PDF Password Remover</> : <>HEIC to PNG</>}
         </h1>
+
+        <TabNav activeTab={activeTab} onChange={setActiveTab} />
 
         {activeTab === 'pdf' && <PDFRemoverForm />}
 

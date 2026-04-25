@@ -3,6 +3,7 @@ import { useRustHeicConverter } from './useRustHeicConverter';
 import { createSafeBuffer } from '../utils/createSafeBuffer';
 import { downloadBlob } from '../utils/downloadBlob';
 import { useProcessing } from '../context/ProcessingContext';
+import { detectImageContainer, getUnsupportedHeicMessage } from '../utils/detectImageContainer';
 
 export const useHeicConverter = () => {
   const [heicFile, setHeicFile] = useState(null);
@@ -37,6 +38,12 @@ export const useHeicConverter = () => {
 
     try {
       const imageBuffer = await createSafeBuffer(heicFile);
+      const detected = detectImageContainer(imageBuffer);
+
+      if (detected.format === 'png' || detected.format === 'jpeg') {
+        throw new Error(getUnsupportedHeicMessage(heicFile.name, detected));
+      }
+
       const outBlob = await processHeicWithRust(imageBuffer, {
         compressToUnder2MB: compressToUnder2MB,
       });

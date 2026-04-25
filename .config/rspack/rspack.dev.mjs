@@ -36,6 +36,7 @@ const rspackConfig = {
     hot: true,
     client: {
       overlay: {
+        warnings: false,
         runtimeErrors: false,
       },
     },
