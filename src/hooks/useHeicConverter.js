@@ -33,6 +33,7 @@ export const useHeicConverter = () => {
 
     setIsProcessingHeic(true);
     setHeicError('');
+    setHeicSuccessMessage('');
 
     try {
       const imageBuffer = await createSafeBuffer(heicFile);

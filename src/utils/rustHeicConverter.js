@@ -31,8 +31,12 @@ export const initWasm = async () => {
  */
 export const heicToPng = async (heicData, opts = {}) => {
   if (workerClient && workerClient.isSupported()) {
-    const { result, mimeType } = await workerClient.processHeic(heicData, opts);
-    return new Blob([result], { type: mimeType || 'image/png' });
+    try {
+      const { result, mimeType } = await workerClient.processHeic(heicData, opts);
+      return new Blob([result], { type: mimeType || 'image/png' });
+    } catch (err) {
+      console.warn('[RustWasm] HEIC worker processing failed, falling back to main thread:', err);
+    }
   }
 
   await initWasm();
@@ -53,8 +57,12 @@ export const heicToPng = async (heicData, opts = {}) => {
  */
 export const heicToPngUnderSize = async (heicData, maxBytes = 2 * 1024 * 1024, opts = {}) => {
   if (workerClient && workerClient.isSupported()) {
-    const { result, mimeType } = await workerClient.processHeic(heicData, { maxBytes, ...opts });
-    return new Blob([result], { type: mimeType || 'image/png' });
+    try {
+      const { result, mimeType } = await workerClient.processHeic(heicData, { maxBytes, ...opts });
+      return new Blob([result], { type: mimeType || 'image/png' });
+    } catch (err) {
+      console.warn('[RustWasm] HEIC worker compression failed, falling back to main thread:', err);
+    }
   }
 
   await initWasm();

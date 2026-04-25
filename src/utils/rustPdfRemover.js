@@ -24,8 +24,12 @@ export const initWasm = async () => {
  */
 export const rustPdfRemover = async (pdfData, password, opts = {}) => {
   if (workerClient && workerClient.isSupported()) {
-    const { result, mimeType } = await workerClient.processPdf(pdfData, password, opts);
-    return new Blob([result], { type: mimeType || 'application/pdf' });
+    try {
+      const { result, mimeType } = await workerClient.processPdf(pdfData, password, opts);
+      return new Blob([result], { type: mimeType || 'application/pdf' });
+    } catch (err) {
+      console.warn('[RustWasm] PDF worker processing failed, falling back to main thread:', err);
+    }
   }
 
   await initWasm();
