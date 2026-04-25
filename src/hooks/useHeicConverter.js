@@ -1,17 +1,18 @@
 import { useState } from 'react';
-import { createPDFBuffer } from '../utils/createPDFBuffer';
-import { downloadBlob } from '../utils/downloadBlob';
 import { useRustHeicConverter } from './useRustHeicConverter';
+import { createSafeBuffer } from '../utils/createSafeBuffer';
+import { downloadBlob } from '../utils/downloadBlob';
+import { useProcessing } from '../context/ProcessingContext';
 
 export const useHeicConverter = () => {
   const [heicFile, setHeicFile] = useState(null);
   const [heicFileName, setHeicFileName] = useState('');
-  const [isProcessingHeic, setIsProcessingHeic] = useState(false);
   const [heicError, setHeicError] = useState('');
   const [heicSuccessMessage, setHeicSuccessMessage] = useState('');
   const [compressToUnder2MB, setCompressToUnder2MB] = useState(false);
 
   const { processHeicWithRust } = useRustHeicConverter();
+  const { isProcessingHeic, setIsProcessingHeic } = useProcessing();
 
   const handleHeicFileChange = (e) => {
     const selectedFile = e.target.files?.[0];
@@ -28,17 +29,13 @@ export const useHeicConverter = () => {
   };
 
   const handleConvertHeic = async () => {
-    if (!heicFile) {
-      setHeicError('Please select a HEIC image');
-      return;
-    }
+    if (!heicFile) return;
 
     setIsProcessingHeic(true);
     setHeicError('');
-    setHeicSuccessMessage('');
 
     try {
-      const imageBuffer = await createPDFBuffer(heicFile);
+      const imageBuffer = await createSafeBuffer(heicFile);
       const outBlob = await processHeicWithRust(imageBuffer, {
         compressToUnder2MB: compressToUnder2MB,
       });
@@ -57,7 +54,7 @@ export const useHeicConverter = () => {
     } catch (err) {
       const errorMessage = err.message || 'Failed to convert HEIC to PNG';
       setHeicError(errorMessage);
-      console.error('[useHeicConverter] HEIC conversion error:', err);
+      console.error('[HeicConverterForm] HEIC conversion error:', err);
     } finally {
       setIsProcessingHeic(false);
     }

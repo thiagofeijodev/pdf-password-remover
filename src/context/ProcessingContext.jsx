@@ -1,5 +1,6 @@
-import { useContext } from 'react';
-import { ProcessingContext } from '../context/index';
+import { createContext, useContext } from 'react';
+
+export const ProcessingContext = createContext();
 
 export const useProcessing = () => {
   const context = useContext(ProcessingContext);

@@ -1,19 +1,19 @@
 import { useState } from 'react';
-import { ProcessingContext } from './index';
+import { ProcessingContext } from './ProcessingContext';
 
 export const ProcessingProvider = ({ children }) => {
-  const [isPDFProcessing, setIsPDFProcessing] = useState(false);
-  const [isHeicProcessing, setIsHeicProcessing] = useState(false);
+  const [isProcessingPDF, setIsProcessingPDF] = useState(false);
+  const [isProcessingHeic, setIsProcessingHeic] = useState(false);
 
-  const isProcessing = isPDFProcessing || isHeicProcessing;
+  const isProcessing = isProcessingPDF || isProcessingHeic;
 
   return (
     <ProcessingContext.Provider
       value={{
-        isPDFProcessing,
-        setIsPDFProcessing,
-        isHeicProcessing,
-        setIsHeicProcessing,
+        isProcessingPDF,
+        setIsProcessingPDF,
+        isProcessingHeic,
+        setIsProcessingHeic,
         isProcessing,
       }}
     >

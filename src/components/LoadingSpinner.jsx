@@ -1,5 +1,5 @@
-import { useProcessing } from '../hooks/useProcessing';
 import * as styles from './LoadingSpinner.module.css';
+import { useProcessing } from '../context/ProcessingContext';
 
 export default function LoadingSpinner() {
   const { isProcessing } = useProcessing();

@@ -45,7 +45,7 @@ const HeicConverterForm = () => {
             onChange={handleCompressToggle}
             disabled={isProcessingHeic}
           />{' '}
-          Resize and compress to be smaller than 2MB
+          Resize and compress
         </label>
       </div>
       {heicSuccessMessage && <div className={styles.success}>{heicSuccessMessage}</div>}

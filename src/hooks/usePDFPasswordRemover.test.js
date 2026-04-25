@@ -5,14 +5,14 @@
 
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { ProcessingProvider } from '../context/ProcessingContext';
+import { ProcessingProvider } from '../context/ProcessingProvider';
 import { usePDFPasswordRemover } from './usePDFPasswordRemover';
 
 const wrapper = ({ children }) => React.createElement(ProcessingProvider, null, children);
 
-// Mock createPDFBuffer
-jest.mock('../utils/createPDFBuffer', () => ({
-  createPDFBuffer: jest.fn(async (file) => {
+// Mock createSafeBuffer
+jest.mock('../utils/createSafeBuffer', () => ({
+  createSafeBuffer: jest.fn(async (file) => {
     return file.arrayBuffer();
   }),
 }));
@@ -23,7 +23,7 @@ jest.mock('../utils/downloadBlob', () => ({
 }));
 
 const mockDownloadBlob = require('../utils/downloadBlob').downloadBlob;
-const mockCreatePDFBuffer = require('../utils/createPDFBuffer').createPDFBuffer;
+const mockCreatePDFBuffer = require('../utils/createSafeBuffer').createSafeBuffer;
 
 describe('usePDFPasswordRemover', () => {
   const mockProcessPDFWithPdfium = jest.fn(async (pdfData, password) => {

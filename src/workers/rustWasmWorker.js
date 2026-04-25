@@ -88,7 +88,11 @@ self.onmessage = async (ev) => {
         outBytes = heic.convert_heic_to_png(input);
       }
 
-      if (cancelled.has(id)) return self.postMessage({ type: 'cancelled', id });
+      if (cancelled.has(id)) {
+        cancelled.delete(id);
+        return self.postMessage({ type: 'cancelled', id });
+      }
+      cancelled.delete(id);
 
       // Copy result into transferable ArrayBuffer
       const resultUint8 = new Uint8Array(outBytes);
@@ -107,7 +111,11 @@ self.onmessage = async (ev) => {
       const input = new Uint8Array(buffer);
       const outBytes = pdf.remove_password(input, password || '');
 
-      if (cancelled.has(id)) return self.postMessage({ type: 'cancelled', id });
+      if (cancelled.has(id)) {
+        cancelled.delete(id);
+        return self.postMessage({ type: 'cancelled', id });
+      }
+      cancelled.delete(id);
 
       const resultUint8 = new Uint8Array(outBytes);
       self.postMessage(

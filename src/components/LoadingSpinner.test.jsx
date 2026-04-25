@@ -2,19 +2,19 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import LoadingSpinner from './LoadingSpinner';
-import { ProcessingProvider } from '../context/ProcessingContext';
-import { useProcessing } from '../hooks/useProcessing';
+import { ProcessingProvider } from '../context/ProcessingProvider';
+import { useProcessing } from '../context/ProcessingContext';
 
 describe('LoadingSpinner', () => {
   const TestComponent = ({ onMount }) => {
-    const { setIsPDFProcessing } = useProcessing();
+    const { setIsProcessingPDF } = useProcessing();
     React.useEffect(() => {
-      onMount?.(setIsPDFProcessing);
-    }, [setIsPDFProcessing, onMount]);
+      onMount?.(setIsProcessingPDF);
+    }, [setIsProcessingPDF, onMount]);
 
     return (
       <div>
-        <button onClick={() => setIsPDFProcessing(true)}>Start</button>
+        <button onClick={() => setIsProcessingPDF(true)}>Start</button>
         <LoadingSpinner />
       </div>
     );

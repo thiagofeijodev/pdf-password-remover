@@ -22,9 +22,9 @@ export const initWasm = async () => {
 /**
  * Remove password from encrypted PDF using Rust WASM or worker when available
  */
-export const rustPdfRemover = async (pdfData, password) => {
+export const rustPdfRemover = async (pdfData, password, opts = {}) => {
   if (workerClient && workerClient.isSupported()) {
-    const { result, mimeType } = await workerClient.processPdf(pdfData, password);
+    const { result, mimeType } = await workerClient.processPdf(pdfData, password, opts);
     return new Blob([result], { type: mimeType || 'application/pdf' });
   }
 

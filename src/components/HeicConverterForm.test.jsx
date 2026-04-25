@@ -11,8 +11,8 @@ jest.mock('../hooks/useRustHeicConverter', () => ({
   }),
 }));
 
-jest.mock('../utils/createPDFBuffer', () => ({
-  createPDFBuffer: jest.fn(async () => new ArrayBuffer(8)),
+jest.mock('../utils/createSafeBuffer', () => ({
+  createSafeBuffer: jest.fn(async () => new ArrayBuffer(8)),
 }));
 
 jest.mock('../utils/downloadBlob', () => ({
@@ -23,10 +23,15 @@ describe('HeicConverterForm', () => {
   it('allows selecting a HEIC file and triggers conversion flow', async () => {
     const user = userEvent.setup();
 
-    const { createPDFBuffer } = require('../utils/createPDFBuffer');
+    const { createSafeBuffer } = require('../utils/createSafeBuffer');
     const { downloadBlob } = require('../utils/downloadBlob');
+    const { ProcessingProvider } = require('../context/ProcessingProvider');
 
-    render(<HeicConverterForm />);
+    render(
+      <ProcessingProvider>
+        <HeicConverterForm />
+      </ProcessingProvider>,
+    );
 
     const fileInput = screen.getByLabelText(/Select HEIC Image/i);
     const convertButton = screen.getByRole('button', { name: /Convert to PNG & Download/i });
@@ -39,7 +44,7 @@ describe('HeicConverterForm', () => {
     // Click convert
     await user.click(convertButton);
 
-    expect(createPDFBuffer).toHaveBeenCalled();
+    expect(createSafeBuffer).toHaveBeenCalled();
     expect(downloadBlob).toHaveBeenCalled();
   });
 });

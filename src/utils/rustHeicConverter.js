@@ -29,9 +29,9 @@ export const initWasm = async () => {
  * @param {ArrayBuffer} heicData - Raw HEIC image bytes
  * @returns {Promise<Blob>} PNG image as Blob
  */
-export const heicToPng = async (heicData) => {
+export const heicToPng = async (heicData, opts = {}) => {
   if (workerClient && workerClient.isSupported()) {
-    const { result, mimeType } = await workerClient.processHeic(heicData);
+    const { result, mimeType } = await workerClient.processHeic(heicData, opts);
     return new Blob([result], { type: mimeType || 'image/png' });
   }
 
@@ -51,9 +51,9 @@ export const heicToPng = async (heicData) => {
  * Convert HEIC to PNG and ensure result is under maxBytes by performing resizing in Rust.
  * Uses worker when available.
  */
-export const heicToPngUnderSize = async (heicData, maxBytes = 2 * 1024 * 1024) => {
+export const heicToPngUnderSize = async (heicData, maxBytes = 2 * 1024 * 1024, opts = {}) => {
   if (workerClient && workerClient.isSupported()) {
-    const { result, mimeType } = await workerClient.processHeic(heicData, { maxBytes });
+    const { result, mimeType } = await workerClient.processHeic(heicData, { maxBytes, ...opts });
     return new Blob([result], { type: mimeType || 'image/png' });
   }
 

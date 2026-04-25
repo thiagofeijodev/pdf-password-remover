@@ -2,7 +2,6 @@
 const SUPPORTS_WORKER = typeof Worker !== 'undefined';
 
 const pending = new Map();
-const progressListeners = new Set();
 
 let worker = null;
 
@@ -65,7 +64,10 @@ function ensureWorker() {
       return;
     }
     if (type === 'progress') {
-      for (const cb of progressListeners) cb(id, msg);
+      if (id && pending.has(id)) {
+        const { onProgress } = pending.get(id);
+        if (onProgress) onProgress(msg);
+      }
       return;
     }
 
@@ -94,11 +96,13 @@ function ensureWorker() {
   worker.onerror = (err) => {
     console.error('[workerWasmClient] Worker error', err);
     rejectAllPending(new Error('Worker error'));
+    worker = null;
   };
 
   worker.onmessageerror = (err) => {
     console.error('[workerWasmClient] Worker message error', err);
     rejectAllPending(new Error('Worker message error'));
+    worker = null;
   };
 
   return worker;
@@ -112,18 +116,13 @@ export function isSupported() {
   return SUPPORTS_WORKER;
 }
 
-export function onProgress(cb) {
-  progressListeners.add(cb);
-  return () => progressListeners.delete(cb);
-}
-
 export function processHeic(buffer, opts = {}) {
   if (!isSupported()) return Promise.reject(new Error('Workers not supported'));
   const id = makeId();
   const w = ensureWorker();
   if (!w) return Promise.reject(new Error('Worker unavailable'));
   return new Promise((resolve, reject) => {
-    pending.set(id, { resolve, reject });
+    pending.set(id, { resolve, reject, onProgress: opts.onProgress });
     const { maxBytes } = opts;
     try {
       w.postMessage({ type: 'processHeic', id, buffer, maxBytes }, [buffer]);
@@ -134,13 +133,13 @@ export function processHeic(buffer, opts = {}) {
   });
 }
 
-export function processPdf(buffer, password = '') {
+export function processPdf(buffer, password = '', opts = {}) {
   if (!isSupported()) return Promise.reject(new Error('Workers not supported'));
   const id = makeId();
   const w = ensureWorker();
   if (!w) return Promise.reject(new Error('Worker unavailable'));
   return new Promise((resolve, reject) => {
-    pending.set(id, { resolve, reject });
+    pending.set(id, { resolve, reject, onProgress: opts.onProgress });
     try {
       w.postMessage({ type: 'processPdf', id, buffer, password }, [buffer]);
     } catch {
@@ -156,7 +155,6 @@ export function cancel(id) {
 
 export default {
   isSupported,
-  onProgress,
   processHeic,
   processPdf,
   cancel,

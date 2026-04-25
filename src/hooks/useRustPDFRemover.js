@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { rustPdfRemover, initWasm } from '../utils/rustPdfRemover';
-import workerClient from '../utils/workerWasmClient';
 
 /**
  * Hook for using Rust WASM for PDF password removal
@@ -25,15 +24,6 @@ export const useRustPDFRemover = () => {
     init();
   }, []);
 
-  useEffect(() => {
-    if (!workerClient || !workerClient.isSupported()) return undefined;
-    const off = workerClient.onProgress((id, msg) => {
-      setProgress(msg.percent ?? null);
-      setProgressStage(msg.stage ?? null);
-    });
-    return off;
-  }, []);
-
   /**
    * Process a PDF file and remove password encryption using Rust WASM
    * @param {ArrayBuffer} pdfData - The PDF file data as ArrayBuffer
@@ -45,7 +35,11 @@ export const useRustPDFRemover = () => {
       console.log('[Hook] Starting PDF processing with Rust WASM');
       setProgress(null);
       setProgressStage('starting');
-      const blob = await rustPdfRemover(pdfData, password);
+      const onProgress = (msg) => {
+        setProgress(msg.percent ?? null);
+        setProgressStage(msg.stage ?? null);
+      };
+      const blob = await rustPdfRemover(pdfData, password, { onProgress });
       setProgressStage('done');
       console.log('[Hook] Processing successful');
       return blob;
