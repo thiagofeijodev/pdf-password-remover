@@ -1,4 +1,5 @@
-use image::{load_from_memory, ImageFormat};
+use heic::{DecoderConfig, PixelLayout};
+use image::{load_from_memory, DynamicImage, ImageFormat, RgbaImage};
 use std::io::Cursor;
 use wasm_bindgen::prelude::*;
 use image::imageops::FilterType;
@@ -7,6 +8,21 @@ use png::{Encoder, Compression, ColorType, BitDepth};
 #[wasm_bindgen(start)]
 pub fn init_panic_hook() {
     console_error_panic_hook::set_once();
+}
+
+fn decode_any_to_dynamic_image(image_data: &[u8]) -> Result<DynamicImage, String> {
+    if let Ok(decoded) = load_from_memory(image_data) {
+        return Ok(decoded);
+    }
+
+    let heic_output = DecoderConfig::new()
+        .decode(image_data, PixelLayout::Rgba8)
+        .map_err(|e| format!("Failed to decode HEIC image: {}", e))?;
+
+    let rgba = RgbaImage::from_raw(heic_output.width, heic_output.height, heic_output.data)
+        .ok_or_else(|| "Failed to construct RGBA image buffer from HEIC decode".to_string())?;
+
+    Ok(DynamicImage::ImageRgba8(rgba))
 }
 
 /// Converts image data to PNG format
@@ -19,11 +35,7 @@ pub fn init_panic_hook() {
 /// PNG image bytes or error message
 #[wasm_bindgen]
 pub fn convert_heic_to_png(image_data: &[u8]) -> Result<Vec<u8>, String> {
-    // Load image from memory
-    let img = match load_from_memory(image_data) {
-        Ok(i) => i,
-        Err(e) => return Err(format!("Failed to decode image: {}", e)),
-    };
+    let img = decode_any_to_dynamic_image(image_data)?;
     
     // Encode as PNG
     let mut png_data = Vec::new();
@@ -37,11 +49,7 @@ pub fn convert_heic_to_png(image_data: &[u8]) -> Result<Vec<u8>, String> {
 /// until the produced PNG bytes are <= `max_bytes`.
 #[wasm_bindgen]
 pub fn convert_heic_to_png_under_size(image_data: &[u8], max_bytes: usize) -> Result<Vec<u8>, String> {
-    // Decode
-    let mut dyn_img = match load_from_memory(image_data) {
-        Ok(i) => i,
-        Err(e) => return Err(format!("Failed to decode image: {}", e)),
-    };
+    let mut dyn_img = decode_any_to_dynamic_image(image_data)?;
 
     // Try several iterations: encode at current size, if too large then downscale and retry
     let mut last_buf = Vec::new();

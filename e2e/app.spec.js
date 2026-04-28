@@ -143,39 +143,43 @@ test.describe('HEIC to PNG Converter', () => {
     await expect(button).toBeDisabled();
   });
 
-  test('should convert HEIC image to PNG', { timeout: 90000 }, async ({ page }) => {
-    const heicPath = resolve(__dirname, './assets/sample.heic');
+  test('should convert HEIC images to PNG', { timeout: 90000 }, async ({ page }) => {
+    const samples = ['sample.heic', 'sample2.HEIC'];
 
-    // Upload the file
-    await page.setInputFiles('input[type="file"]', heicPath);
+    for (const sampleName of samples) {
+      const heicPath = resolve(__dirname, `./assets/${sampleName}`);
 
-    // Check that file is selected
-    const fileInput = page.getByLabel(/select heic image/i);
-    await expect(fileInput).toHaveValue(/sample\.heic/);
+      // Upload the file
+      await page.setInputFiles('input[type="file"]', heicPath);
 
-    // Click the convert button (HEIC conversion can take a while)
-    const button = page.getByRole('button', { name: /convert to png/i });
-    await expect(button).toBeEnabled();
+      // Check that file is selected
+      const fileInput = page.getByLabel(/select heic image/i);
+      await expect(fileInput).toHaveValue(new RegExp(sampleName.replace('.', '\\.'), 'i'));
 
-    const [download] = await Promise.all([
-      page.waitForEvent('download', { timeout: 90000 }),
-      button.click(),
-    ]);
+      // Click the convert button (HEIC conversion can take a while)
+      const button = page.getByRole('button', { name: /convert to png/i });
+      await expect(button).toBeEnabled();
 
-    // Wait for the download to complete
-    const filePath = await download.path();
-    expect(filePath).toBeTruthy();
+      const [download] = await Promise.all([
+        page.waitForEvent('download', { timeout: 90000 }),
+        button.click(),
+      ]);
 
-    // Check the file is a valid PNG (PNG signature: 89 50 4E 47)
-    const fd = fs.openSync(filePath, 'r');
-    const buffer = Buffer.alloc(4);
-    fs.readSync(fd, buffer, 0, 4, 0);
-    fs.closeSync(fd);
-    expect(buffer.toString('latin1')).toBe('\x89PNG');
+      // Wait for the download to complete
+      const filePath = await download.path();
+      expect(filePath).toBeTruthy();
 
-    // Verify file size is reasonable
-    const stats = fs.statSync(filePath);
-    expect(stats.size).toBeGreaterThan(0);
+      // Check the file is a valid PNG (PNG signature: 89 50 4E 47)
+      const fd = fs.openSync(filePath, 'r');
+      const buffer = Buffer.alloc(4);
+      fs.readSync(fd, buffer, 0, 4, 0);
+      fs.closeSync(fd);
+      expect(buffer.toString('latin1')).toBe('\x89PNG');
+
+      // Verify file size is reasonable
+      const stats = fs.statSync(filePath);
+      expect(stats.size).toBeGreaterThan(0);
+    }
   });
 
   test('should switch between tabs correctly', async ({ page }) => {
