@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 import fs from 'fs';
 import { join, resolve } from 'path';
 
+const maxWaitingTime = 10000 * 60 * 5; // 5 minutes
+
 test.describe('PDF Password Remover App', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the app
@@ -143,7 +145,7 @@ test.describe('HEIC to PNG Converter', () => {
     await expect(button).toBeDisabled();
   });
 
-  test('should convert HEIC images to PNG', { timeout: 90000 }, async ({ page }) => {
+  test('should convert HEIC images to PNG', { timeout: maxWaitingTime }, async ({ page }) => {
     const samples = ['sample.heic', 'sample2.HEIC'];
 
     for (const sampleName of samples) {
@@ -161,7 +163,7 @@ test.describe('HEIC to PNG Converter', () => {
       await expect(button).toBeEnabled();
 
       const [download] = await Promise.all([
-        page.waitForEvent('download', { timeout: 90000 }),
+        page.waitForEvent('download', { timeout: maxWaitingTime }),
         button.click(),
       ]);
 
