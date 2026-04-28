@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import fs from 'fs';
 import { join, resolve } from 'path';
 
-const maxWaitingTime = 10000 * 60 * 5; // 5 minutes
+const maxWaitingTime = 5 * 60 * 1000; // 5 minutes
 
 test.describe('PDF Password Remover App', () => {
   test.beforeEach(async ({ page }) => {
