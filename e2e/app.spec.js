@@ -145,7 +145,8 @@ test.describe('HEIC to PNG Converter', () => {
     await expect(button).toBeDisabled();
   });
 
-  test('should convert HEIC images to PNG', { timeout: maxWaitingTime }, async ({ page }) => {
+  test('should convert HEIC images to PNG', async ({ page }) => {
+    test.setTimeout(maxWaitingTime);
     const samples = ['sample.heic', 'sample2.HEIC'];
 
     for (const sampleName of samples) {
