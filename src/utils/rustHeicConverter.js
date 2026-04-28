@@ -3,6 +3,7 @@ import init, {
   init_panic_hook,
   convert_heic_to_png_under_size,
 } from '../wasm-heic/rust_heic_converter.js';
+import heicWorkerClient from './heicWorkerClient';
 
 let wasmInit = null;
 
@@ -28,6 +29,13 @@ export const initWasm = async () => {
  * @returns {Promise<Blob>} PNG image as Blob
  */
 export const heicToPng = async (heicData, opts = {}) => {
+  if (heicWorkerClient.isSupported() && !opts.preferMainThread) {
+    const { result, mimeType } = await heicWorkerClient.processHeic(heicData, {
+      onProgress: opts.onProgress,
+    });
+    return new Blob([result], { type: mimeType || 'image/png' });
+  }
+
   opts.onProgress?.({ stage: 'loading', percent: 15 });
   await initWasm();
   opts.onProgress?.({ stage: 'decoding', percent: 45 });
@@ -47,6 +55,14 @@ export const heicToPng = async (heicData, opts = {}) => {
  * Convert HEIC to PNG and ensure result is under maxBytes by performing resizing in Rust.
  */
 export const heicToPngUnderSize = async (heicData, maxBytes = 2 * 1024 * 1024, opts = {}) => {
+  if (heicWorkerClient.isSupported() && !opts.preferMainThread) {
+    const { result, mimeType } = await heicWorkerClient.processHeic(heicData, {
+      maxBytes,
+      onProgress: opts.onProgress,
+    });
+    return new Blob([result], { type: mimeType || 'image/png' });
+  }
+
   opts.onProgress?.({ stage: 'loading', percent: 15 });
   await initWasm();
   opts.onProgress?.({ stage: 'resizing', percent: 50 });
