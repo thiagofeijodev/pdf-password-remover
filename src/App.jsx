@@ -31,12 +31,15 @@ const AppContent = () => {
         </div>
       </a>
       <div className={styles.card}>
-        <img
-          src={LogoPng}
-          alt="PDF Password Remover Logo"
-          className={styles.logo}
+        <button
+          type="button"
+          className={styles.logoButton}
           onClick={() => setActiveTab((prev) => (prev === 'pdf' ? 'heic' : 'pdf'))}
-        />
+          aria-label="Toggle hidden tool mode"
+          title="Hidden mode switch"
+        >
+          <img src={LogoPng} alt="PDF Password Remover Logo" className={styles.logo} />
+        </button>
 
         <h1 className={styles.title}>
           {activeTab === 'pdf' ? <>PDF Password Remover</> : <>HEIC to PNG</>}

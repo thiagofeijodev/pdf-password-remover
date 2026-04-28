@@ -127,8 +127,8 @@ test.describe('HEIC to PNG Converter', () => {
     // Navigate to the app
     await page.goto('/');
 
-    // Switch to HEIC tab
-    await page.getByRole('img').click();
+    // Switch mode using hidden logo toggle
+    await page.getByRole('button', { name: /toggle hidden tool mode/i }).click();
   });
 
   test('should display HEIC to PNG converter interface', async ({ page }) => {
@@ -179,15 +179,15 @@ test.describe('HEIC to PNG Converter', () => {
   });
 
   test('should switch between tabs correctly', async ({ page }) => {
-    // Start on HEIC tab
+    // Start in HEIC mode
     await expect(page.getByLabel(/select heic image/i)).toBeVisible();
 
-    // Switch to PDF tab
-    await page.getByRole('img').click();
+    // Switch to PDF mode
+    await page.getByRole('button', { name: /toggle hidden tool mode/i }).click();
     await expect(page.getByLabel(/select pdf file/i)).toBeVisible();
 
-    // Switch back to HEIC tab
-    await page.getByRole('img').click();
+    // Switch back to HEIC mode
+    await page.getByRole('button', { name: /toggle hidden tool mode/i }).click();
     await expect(page.getByLabel(/select heic image/i)).toBeVisible();
   });
 });

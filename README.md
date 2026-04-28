@@ -1,11 +1,18 @@
 # PDF Password Remover
 
-A privacy-focused web application for removing password protection from PDF files. Upload a password-protected PDF, enter the password, and download an unlocked version. All processing happens entirely in your browser — files never leave your device.
+A privacy-focused web application with two browser-only tools powered by Rust + WebAssembly:
+
+- Remove password protection from PDF files
+- Convert HEIC images to PNG
+
+All processing happens entirely in your browser — files never leave your device.
 
 ## Quick Summary
 
 - Dev server: http://localhost:3001/ (configured in `.config/rspack/rspack.dev.mjs`)
-- WASM: built from `rust-pdf-remover` with `wasm-pack` into `src/wasm` (prebuilt artifacts exist in the repo)
+- WASM: built from `rust-pdf-remover` into `src/wasm` and `rust-heic-converter` into `src/wasm-heic`
+- Runtime: direct main-thread WebAssembly execution (no dedicated Web Workers)
+- Hidden feature: click the top logo to toggle between PDF remover and HEIC-to-PNG converter
 - Production build output: `docs/` (published by CI to GitHub Pages)
 
 ## Prerequisites
@@ -136,7 +143,9 @@ CI notes:
 ## Files of Interest
 
 - `src/wasm/` — prebuilt wasm-bindgen artifacts (JS + .wasm + types)
-- `rust-pdf-remover/` — Rust crate to build wasm
+- `src/wasm-heic/` — prebuilt wasm-bindgen artifacts for HEIC conversion
+- `rust-pdf-remover/` — Rust crate for PDF password removal
+- `rust-heic-converter/` — Rust crate for HEIC -> PNG conversion
 - `.config/rspack/rspack.dev.mjs` — dev server configuration (port 3001)
 - `.config/rspack/rspack.prod.mjs` — production build configuration (writes to `docs/`)
 - `.github/workflows/main.yml` — CI (build/test/deploy)

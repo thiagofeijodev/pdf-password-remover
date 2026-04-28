@@ -45,6 +45,7 @@ describe('App Component', () => {
     it('should render the main app container', () => {
       render(<App />);
       expect(screen.getByAltText('PDF Password Remover Logo')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /toggle hidden tool mode/i })).toBeInTheDocument();
     });
 
     it('should render the title', () => {
@@ -438,6 +439,19 @@ describe('App Component', () => {
       render(<App />);
 
       expect(mockCreateGoogleTag).toHaveBeenCalled();
+    });
+  });
+
+  describe('Hidden mode switch', () => {
+    it('should switch from PDF remover to HEIC converter when logo is clicked', async () => {
+      const user = userEvent.setup();
+      render(<App />);
+
+      expect(screen.getByLabelText(/Select PDF File/i)).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: /toggle hidden tool mode/i }));
+
+      expect(screen.getByLabelText(/Select HEIC Image/i)).toBeInTheDocument();
     });
   });
 });

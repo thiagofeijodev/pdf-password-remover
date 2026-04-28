@@ -4,12 +4,10 @@ import init, {
   convert_heic_to_png_under_size,
 } from '../wasm-heic/rust_heic_converter.js';
 
-import workerClient from './workerWasmClient';
-
 let wasmInit = null;
 
 /**
- * Initialize the HEIC converter WASM module (fallback path when worker unsupported)
+ * Initialize the HEIC converter WASM module
  */
 export const initWasm = async () => {
   if (wasmInit) return wasmInit;
@@ -25,21 +23,19 @@ export const initWasm = async () => {
 };
 
 /**
- * Convert HEIC image to PNG using Rust WASM or worker when available
+ * Convert HEIC image to PNG using Rust WASM
  * @param {ArrayBuffer} heicData - Raw HEIC image bytes
  * @returns {Promise<Blob>} PNG image as Blob
  */
 export const heicToPng = async (heicData, opts = {}) => {
-  if (workerClient && workerClient.isSupported()) {
-    const { result, mimeType } = await workerClient.processHeic(heicData, opts);
-    return new Blob([result], { type: mimeType || 'image/png' });
-  }
-
+  opts.onProgress?.({ stage: 'loading', percent: 15 });
   await initWasm();
+  opts.onProgress?.({ stage: 'decoding', percent: 45 });
 
   try {
     const uint8Array = new Uint8Array(heicData);
     const pngBytes = convert_heic_to_png(uint8Array);
+    opts.onProgress?.({ stage: 'encoding', percent: 90 });
     return new Blob([pngBytes], { type: 'image/png' });
   } catch (err) {
     console.error('[RustWasm] Error converting HEIC to PNG:', err);
@@ -49,19 +45,16 @@ export const heicToPng = async (heicData, opts = {}) => {
 
 /**
  * Convert HEIC to PNG and ensure result is under maxBytes by performing resizing in Rust.
- * Uses worker when available.
  */
 export const heicToPngUnderSize = async (heicData, maxBytes = 2 * 1024 * 1024, opts = {}) => {
-  if (workerClient && workerClient.isSupported()) {
-    const { result, mimeType } = await workerClient.processHeic(heicData, { maxBytes, ...opts });
-    return new Blob([result], { type: mimeType || 'image/png' });
-  }
-
+  opts.onProgress?.({ stage: 'loading', percent: 15 });
   await initWasm();
+  opts.onProgress?.({ stage: 'resizing', percent: 50 });
 
   try {
     const uint8Array = new Uint8Array(heicData);
     const pngBytes = convert_heic_to_png_under_size(uint8Array, maxBytes);
+    opts.onProgress?.({ stage: 'encoding', percent: 90 });
     return new Blob([pngBytes], { type: 'image/png' });
   } catch (err) {
     console.error('[RustWasm] Error converting HEIC to PNG under size:', err);
