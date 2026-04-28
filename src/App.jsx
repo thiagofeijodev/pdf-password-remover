@@ -35,8 +35,7 @@ const AppContent = () => {
           type="button"
           className={styles.logoButton}
           onClick={() => setActiveTab((prev) => (prev === 'pdf' ? 'heic' : 'pdf'))}
-          aria-label="Toggle hidden tool mode"
-          title="Hidden mode switch"
+          aria-label="App logo"
         >
           <img src={LogoPng} alt="PDF Password Remover Logo" className={styles.logo} />
         </button>

@@ -329,7 +329,7 @@ describe('usePDFPasswordRemover', () => {
         await result.current.handleRemovePassword();
       });
 
-      expect(mockCreatePDFBuffer).toHaveBeenCalledWith(mockFile, 'correct');
+      expect(mockCreatePDFBuffer).toHaveBeenCalledWith(mockFile);
       expect(mockProcessPDFWithPdfium).toHaveBeenCalled();
       expect(mockDownloadBlob).toHaveBeenCalled();
     });

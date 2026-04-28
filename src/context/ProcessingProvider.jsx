@@ -1,23 +1,20 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ProcessingContext } from './ProcessingContext';
 
 export const ProcessingProvider = ({ children }) => {
   const [isProcessingPDF, setIsProcessingPDF] = useState(false);
   const [isProcessingHeic, setIsProcessingHeic] = useState(false);
 
-  const isProcessing = isProcessingPDF || isProcessingHeic;
-
-  return (
-    <ProcessingContext.Provider
-      value={{
-        isProcessingPDF,
-        setIsProcessingPDF,
-        isProcessingHeic,
-        setIsProcessingHeic,
-        isProcessing,
-      }}
-    >
-      {children}
-    </ProcessingContext.Provider>
+  const value = useMemo(
+    () => ({
+      isProcessingPDF,
+      setIsProcessingPDF,
+      isProcessingHeic,
+      setIsProcessingHeic,
+      isProcessing: isProcessingPDF || isProcessingHeic,
+    }),
+    [isProcessingPDF, isProcessingHeic],
   );
+
+  return <ProcessingContext.Provider value={value}>{children}</ProcessingContext.Provider>;
 };
