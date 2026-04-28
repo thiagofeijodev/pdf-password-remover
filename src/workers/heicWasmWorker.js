@@ -1,13 +1,16 @@
 import init, {
   convert_heic_to_png,
   convert_heic_to_png_under_size,
+  init_panic_hook,
 } from '../wasm-heic/rust_heic_converter.js';
 
 let wasmReady = null;
 
 const ensureReady = async () => {
   if (wasmReady) return wasmReady;
-  wasmReady = init();
+  wasmReady = init().then(() => {
+    init_panic_hook();
+  });
   return wasmReady;
 };
 

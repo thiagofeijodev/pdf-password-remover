@@ -1,5 +1,6 @@
 import init, {
   convert_heic_to_png,
+  init_panic_hook,
   convert_heic_to_png_under_size,
 } from '../wasm-heic/rust_heic_converter.js';
 import heicWorkerClient from './heicWorkerClient';
@@ -14,6 +15,7 @@ export const initWasm = async () => {
 
   try {
     wasmInit = await init();
+    init_panic_hook();
     return wasmInit;
   } catch (err) {
     console.error('[RustWasm] Failed to initialize HEIC converter:', err);
@@ -74,8 +76,4 @@ export const heicToPngUnderSize = async (heicData, maxBytes = 2 * 1024 * 1024, o
     console.error('[RustWasm] Error converting HEIC to PNG under size:', err);
     throw new Error(typeof err === 'string' ? err : 'Failed to convert HEIC to PNG under size');
   }
-};
-
-export const cancelHeicConversion = () => {
-  heicWorkerClient.cancelAll();
 };

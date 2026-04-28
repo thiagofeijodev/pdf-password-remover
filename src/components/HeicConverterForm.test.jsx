@@ -2,20 +2,12 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import HeicConverterForm from './HeicConverterForm';
 
-jest.mock('../utils/rustHeicConverter', () => ({
-  cancelHeicConversion: jest.fn(),
-  heicToPng: jest.fn(),
-  heicToPngUnderSize: jest.fn(),
-  initWasm: jest.fn(),
-}));
-
 // Mock internal utilities/hooks used by the component
 jest.mock('../hooks/useRustHeicConverter', () => ({
   useRustHeicConverter: () => ({
     processHeicWithRust: jest.fn(async () => new Blob(['png'], { type: 'image/png' })),
     isReady: true,
     isLoading: false,
-    initError: null,
   }),
 }));
 

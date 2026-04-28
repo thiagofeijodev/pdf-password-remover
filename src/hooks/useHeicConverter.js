@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useRustHeicConverter } from './useRustHeicConverter';
 import { createSafeBuffer } from '../utils/createSafeBuffer';
 import { downloadBlob } from '../utils/downloadBlob';
-import { cancelHeicConversion } from '../utils/rustHeicConverter';
 import { useProcessing } from '../context/ProcessingContext';
 
 export const useHeicConverter = () => {
@@ -12,7 +11,7 @@ export const useHeicConverter = () => {
   const [heicSuccessMessage, setHeicSuccessMessage] = useState('');
   const [compressToUnder2MB, setCompressToUnder2MB] = useState(false);
 
-  const { processHeicWithRust, initError: wasmInitError } = useRustHeicConverter();
+  const { processHeicWithRust } = useRustHeicConverter();
   const { isProcessingHeic, setIsProcessingHeic } = useProcessing();
 
   const handleHeicFileChange = (e) => {
@@ -42,22 +41,23 @@ export const useHeicConverter = () => {
       });
 
       const baseName = heicFile.name.replace(/\.[^/.]+$/, '');
-      const outputFileName = `${baseName}.png`;
+      // choose extension from returned blob type when possible
+      let ext = '.png';
+      if (outBlob && outBlob.type) {
+        if (outBlob.type.includes('webp')) ext = '.webp';
+        else if (outBlob.type.includes('jpeg') || outBlob.type.includes('jpg')) ext = '.jpg';
+        else if (outBlob.type.includes('png')) ext = '.png';
+      }
+      const outputFileName = `${baseName}${ext}`;
       downloadBlob(outBlob, outputFileName);
       setHeicSuccessMessage(`Image converted successfully! File downloaded: ${outputFileName}`);
     } catch (err) {
       const errorMessage = err.message || 'Failed to convert HEIC to PNG';
       setHeicError(errorMessage);
-      console.error('[useHeicConverter] HEIC conversion error:', err);
+      console.error('[HeicConverterForm] HEIC conversion error:', err);
     } finally {
       setIsProcessingHeic(false);
     }
-  };
-
-  const handleCancelHeic = () => {
-    cancelHeicConversion();
-    setIsProcessingHeic(false);
-    setHeicError('');
   };
 
   return {
@@ -67,10 +67,8 @@ export const useHeicConverter = () => {
     heicError,
     heicSuccessMessage,
     compressToUnder2MB,
-    wasmInitError,
     handleHeicFileChange,
     handleCompressToggle,
     handleConvertHeic,
-    handleCancelHeic,
   };
 };

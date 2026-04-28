@@ -9,11 +9,9 @@ const HeicConverterForm = () => {
     heicError,
     heicSuccessMessage,
     compressToUnder2MB,
-    wasmInitError,
     handleHeicFileChange,
     handleCompressToggle,
     handleConvertHeic,
-    handleCancelHeic,
   } = useHeicConverter();
 
   return (
@@ -52,18 +50,15 @@ const HeicConverterForm = () => {
       </div>
       {heicSuccessMessage && <div className={styles.success}>{heicSuccessMessage}</div>}
 
-      {wasmInitError && <div className={styles.error}>{wasmInitError}</div>}
       {heicError && <div className={styles.error}>{heicError}</div>}
 
-      {isProcessingHeic ? (
-        <button type="button" onClick={handleCancelHeic} className={styles.button}>
-          Cancel
-        </button>
-      ) : (
-        <button onClick={handleConvertHeic} disabled={!heicFile} className={styles.button}>
-          Convert to PNG & Download
-        </button>
-      )}
+      <button
+        onClick={handleConvertHeic}
+        disabled={isProcessingHeic || !heicFile}
+        className={styles.button}
+      >
+        {isProcessingHeic ? 'Converting...' : 'Convert to PNG & Download'}
+      </button>
     </div>
   );
 };

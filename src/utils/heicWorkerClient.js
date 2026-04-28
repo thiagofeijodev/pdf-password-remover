@@ -60,19 +60,7 @@ const processHeic = (buffer, opts = {}) =>
     activeWorker.postMessage({ id, type: 'convert', payload }, [buffer]);
   });
 
-const cancelAll = () => {
-  if (worker) {
-    worker.terminate();
-    worker = null;
-  }
-  for (const [, request] of pending) {
-    request.reject(new Error('Conversion cancelled'));
-  }
-  pending.clear();
-};
-
 export default {
   isSupported,
   processHeic,
-  cancelAll,
 };

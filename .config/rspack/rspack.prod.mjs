@@ -19,7 +19,7 @@ export default () => {
     plugins: [
       ...common.plugins,
       new rspack.DefinePlugin({
-        'process.env.REACT_APP_GA_ID': JSON.stringify(process.env.REACT_APP_GA_ID || ''),
+        'process.env.REACT_APP_GA_ID': JSON.stringify(process.env.REACT_APP_GA_ID),
       }),
       new HtmlWebpackPlugin({
         favicon: 'public/logo.png',

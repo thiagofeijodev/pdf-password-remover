@@ -58,8 +58,10 @@ pub fn convert_heic_to_png_under_size(image_data: &[u8], max_bytes: usize) -> Re
 
     // Keep iterating until under size or until image dims reach 1px
     for _ in 0..50 {
+        // Convert to RGBA8 bytes
         let rgba = dyn_img.to_rgba8();
-        let bytes = rgba.as_raw();
+        let rgba_buf = rgba.into_raw();
+        let bytes = rgba_buf.as_slice();
 
         // Encode PNG with best compression
         last_buf.clear();
@@ -78,14 +80,14 @@ pub fn convert_heic_to_png_under_size(image_data: &[u8], max_bytes: usize) -> Re
         }
 
         if last_buf.len() <= max_bytes {
-            return Ok(last_buf);
+            return Ok(last_buf.clone());
         }
 
         // Need to downscale: reduce by factor
         let new_w = ((width as f32) * 0.75).max(1.0) as u32;
         let new_h = ((height as f32) * 0.75).max(1.0) as u32;
         if new_w >= width && new_h >= height { break; }
-        let resized = image::imageops::resize(&rgba, new_w, new_h, FilterType::Lanczos3);
+        let resized = image::imageops::resize(&dyn_img.to_rgba8(), new_w, new_h, FilterType::Lanczos3);
         dyn_img = image::DynamicImage::ImageRgba8(resized);
         width = dyn_img.width();
         height = dyn_img.height();
@@ -94,5 +96,5 @@ pub fn convert_heic_to_png_under_size(image_data: &[u8], max_bytes: usize) -> Re
     }
 
     // If we exit loop without meeting size, return last produced PNG (possibly > max_bytes)
-    Ok(last_buf)
+    Ok(last_buf.clone())
 }

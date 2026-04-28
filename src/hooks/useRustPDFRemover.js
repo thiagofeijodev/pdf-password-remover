@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
 import { rustPdfRemover, initWasm } from '../utils/rustPdfRemover';
 
+/**
+ * Hook for using Rust WASM for PDF password removal
+ */
 export const useRustPDFRemover = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isReady, setIsReady] = useState(false);
+  const [progress, setProgress] = useState(null);
+  const [progressStage, setProgressStage] = useState(null);
 
   useEffect(() => {
     const init = async () => {
@@ -19,12 +24,27 @@ export const useRustPDFRemover = () => {
     init();
   }, []);
 
+  /**
+   * Process a PDF file and remove password encryption using Rust WASM
+   * @param {ArrayBuffer} pdfData - The PDF file data as ArrayBuffer
+   * @param {string} password - The password to use for decryption
+   * @returns {Promise<Blob>} The decrypted PDF data as Blob
+   */
   const processPDFWithRust = async (pdfData, password) => {
-    // eslint-disable-next-line no-useless-catch
     try {
-      const blob = await rustPdfRemover(pdfData, password);
+      console.log('[Hook] Starting PDF processing with Rust WASM');
+      setProgress(null);
+      setProgressStage('starting');
+      const onProgress = (msg) => {
+        setProgress(msg.percent ?? null);
+        setProgressStage(msg.stage ?? null);
+      };
+      const blob = await rustPdfRemover(pdfData, password, { onProgress });
+      setProgressStage('done');
+      console.log('[Hook] Processing successful');
       return blob;
     } catch (err) {
+      console.error('[Hook] PDF processing error:', err);
       throw err;
     }
   };
@@ -33,5 +53,7 @@ export const useRustPDFRemover = () => {
     isLoading,
     processPDFWithRust,
     isReady,
+    progress,
+    progressStage,
   };
 };

@@ -93,18 +93,24 @@ export const usePDFPasswordRemover = (processPDF) => {
     setSuccessMessage('');
 
     try {
-      const pdfDocument = await createSafeBuffer(file);
+      // create PDF.js document object with password
+      const pdfDocument = await createSafeBuffer(file, password);
+
+      // convert PDF to new PDF without password
       const newPdf = await processPDF(pdfDocument, password);
+
+      // download the new PDF without password
       downloadBlob(newPdf, fileName);
+
       setSuccessMessage(`Password removed successfully! File downloaded: ${fileName}`);
+      setIsProcessingPDF(false);
     } catch (err) {
+      setIsProcessingPDF(false);
       if (err.message.includes('password') || err.message.includes('PasswordException')) {
         setError('Incorrect password. Please try again.');
       } else {
         setError('Error processing PDF: ' + err.message);
       }
-    } finally {
-      setIsProcessingPDF(false);
     }
   };
 
