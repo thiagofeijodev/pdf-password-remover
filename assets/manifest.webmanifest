@@ -64,7 +64,7 @@
       "purpose": "any"
     }
   ],
-  "description": "Remove password from PDF files",
+  "description": "Convert files: remove PDF passwords, HEIC to PNG. Privacy-focused, all processing in your browser.",
   "scope": "./",
   "display_override": [
     "window-control-overlay",
