@@ -1,17 +1,14 @@
-/**
- * Unit tests for App component
- * Tests file input, password input, form submission, and error states
- */
-
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 
-// Mock the hooks
-jest.mock('./hooks/useRustPDFRemover');
-jest.mock('./hooks/usePDFPasswordRemover');
 jest.mock('./utils/createGoogleTag');
 jest.mock('../public/logo.png', () => 'logo.png');
+
+// Mock the password remover hook locally for these component tests
+jest.mock('./hooks/usePDFPasswordRemover', () => ({
+  usePDFPasswordRemover: jest.fn(),
+}));
 
 describe('App Component', () => {
   const mockUseRustPDFRemover = require('./hooks/useRustPDFRemover').useRustPDFRemover;
@@ -48,6 +45,7 @@ describe('App Component', () => {
     it('should render the main app container', () => {
       render(<App />);
       expect(screen.getByAltText('PDF Password Remover Logo')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /toggle hidden tool mode/i })).toBeInTheDocument();
     });
 
     it('should render the title', () => {
@@ -441,6 +439,19 @@ describe('App Component', () => {
       render(<App />);
 
       expect(mockCreateGoogleTag).toHaveBeenCalled();
+    });
+  });
+
+  describe('Hidden mode switch', () => {
+    it('should switch from PDF remover to HEIC converter when logo is clicked', async () => {
+      const user = userEvent.setup();
+      render(<App />);
+
+      expect(screen.getByLabelText(/Select PDF File/i)).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: /toggle hidden tool mode/i }));
+
+      expect(screen.getByLabelText(/Select HEIC Image/i)).toBeInTheDocument();
     });
   });
 });

@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 import fs from 'fs';
 import { join, resolve } from 'path';
 
+const maxWaitingTime = 5 * 60 * 1000; // 5 minutes
+
 test.describe('PDF Password Remover App', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the app
@@ -119,5 +121,80 @@ test.describe('PDF Password Remover App', () => {
 
     // Clean up temporary file
     fs.unlinkSync(decryptedPdfPath);
+  });
+});
+
+test.describe('HEIC to PNG Converter', () => {
+  test.beforeEach(async ({ page }) => {
+    // Navigate to the app
+    await page.goto('/');
+
+    // Switch mode using hidden logo toggle
+    await page.getByRole('button', { name: /toggle hidden tool mode/i }).click();
+  });
+
+  test('should display HEIC to PNG converter interface', async ({ page }) => {
+    // Check for HEIC-specific elements
+    await expect(page.getByLabel(/select heic image/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /convert to png/i })).toBeVisible();
+    await expect(page.getByText(/convert your heic images to png format/i)).toBeVisible();
+  });
+
+  test('should disable convert button when no file is selected', async ({ page }) => {
+    const button = page.getByRole('button', { name: /convert to png/i });
+    await expect(button).toBeDisabled();
+  });
+
+  test('should convert HEIC images to PNG', async ({ page }) => {
+    test.setTimeout(maxWaitingTime);
+    const samples = ['sample.heic', 'sample2.HEIC'];
+
+    for (const sampleName of samples) {
+      const heicPath = resolve(__dirname, `./assets/${sampleName}`);
+
+      // Upload the file
+      await page.setInputFiles('input[type="file"]', heicPath);
+
+      // Check that file is selected
+      const fileInput = page.getByLabel(/select heic image/i);
+      await expect(fileInput).toHaveValue(new RegExp(sampleName.replace('.', '\\.'), 'i'));
+
+      // Click the convert button (HEIC conversion can take a while)
+      const button = page.getByRole('button', { name: /convert to png/i });
+      await expect(button).toBeEnabled();
+
+      const [download] = await Promise.all([
+        page.waitForEvent('download', { timeout: maxWaitingTime }),
+        button.click(),
+      ]);
+
+      // Wait for the download to complete
+      const filePath = await download.path();
+      expect(filePath).toBeTruthy();
+
+      // Check the file is a valid PNG (PNG signature: 89 50 4E 47)
+      const fd = fs.openSync(filePath, 'r');
+      const buffer = Buffer.alloc(4);
+      fs.readSync(fd, buffer, 0, 4, 0);
+      fs.closeSync(fd);
+      expect(buffer.toString('latin1')).toBe('\x89PNG');
+
+      // Verify file size is reasonable
+      const stats = fs.statSync(filePath);
+      expect(stats.size).toBeGreaterThan(0);
+    }
+  });
+
+  test('should switch between tabs correctly', async ({ page }) => {
+    // Start in HEIC mode
+    await expect(page.getByLabel(/select heic image/i)).toBeVisible();
+
+    // Switch to PDF mode
+    await page.getByRole('button', { name: /toggle hidden tool mode/i }).click();
+    await expect(page.getByLabel(/select pdf file/i)).toBeVisible();
+
+    // Switch back to HEIC mode
+    await page.getByRole('button', { name: /toggle hidden tool mode/i }).click();
+    await expect(page.getByLabel(/select heic image/i)).toBeVisible();
   });
 });

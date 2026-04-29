@@ -7,10 +7,12 @@
     "node": "24.9.0"
   },
   "scripts": {
-    "start": "npm run build:wasm:dev && node .config/rspack/rspack.dev.mjs",
+    "start": "npm run build:wasm:dev && npm run build:wasm:heic:dev && node .config/rspack/rspack.dev.mjs",
     "build:wasm": "wasm-pack build --target web --out-dir ../src/wasm --release rust-pdf-remover",
     "build:wasm:dev": "wasm-pack build --target web --out-dir ../src/wasm --dev rust-pdf-remover",
-    "build": "npm run build:wasm && rspack --config .config/rspack/rspack.prod.mjs",
+    "build:wasm:heic": "wasm-pack build --target web --out-dir ../src/wasm-heic --release rust-heic-converter",
+    "build:wasm:heic:dev": "wasm-pack build --target web --out-dir ../src/wasm-heic --dev rust-heic-converter",
+    "build": "npm run build:wasm && npm run build:wasm:heic && rspack --config .config/rspack/rspack.prod.mjs",
     "analyzer": "rspack build --analyze --mode development --config .config/rspack/rspack.prod.mjs",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",

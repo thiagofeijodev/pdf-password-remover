@@ -1,7 +1,7 @@
 {
   "short_name": "PDF Remover",
   "name": "PDF Password Remover",
-  "description": "Remove password from PDF files",
+  "description": "Convert files: remove PDF passwords, HEIC to PNG. Privacy-focused, all processing in your browser.",
   "start_url": "./index.html",
   "scope": "./",
   "dir": "ltr",

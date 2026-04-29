@@ -32,14 +32,6 @@ jobs:
           CI: 1
         run: npm run test:e2e:ci
 
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
-
   health-check:
     name: Check if app is up and working
     runs-on: ubuntu-latest

@@ -9,7 +9,6 @@ export const initWasm = async () => {
   if (wasmInit) return wasmInit;
 
   try {
-    // init() fetches the wasm file automatically if using --target web
     wasmInit = await init();
     init_panic_hook();
     return wasmInit;
@@ -21,16 +20,16 @@ export const initWasm = async () => {
 
 /**
  * Remove password from encrypted PDF using Rust WASM
- * @param {ArrayBuffer} pdfData - PDF file as ArrayBuffer
- * @param {string} password - Password to decrypt
- * @returns {Promise<Blob>} - Decrypted PDF as Blob
  */
-export const rustPdfRemover = async (pdfData, password) => {
+export const rustPdfRemover = async (pdfData, password, opts = {}) => {
+  opts.onProgress?.({ stage: 'loading', percent: 15 });
   await initWasm();
+  opts.onProgress?.({ stage: 'processing', percent: 60 });
 
   try {
     const uint8Array = new Uint8Array(pdfData);
     const decryptedPdf = remove_password(uint8Array, password);
+    opts.onProgress?.({ stage: 'writing', percent: 95 });
     return new Blob([decryptedPdf], { type: 'application/pdf' });
   } catch (err) {
     console.error('[RustWasm] Error removing password:', err);

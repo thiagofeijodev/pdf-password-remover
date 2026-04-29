@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { createPDFBuffer } from '../utils/createPDFBuffer';
+import { createSafeBuffer } from '../utils/createSafeBuffer';
 import { downloadBlob } from '../utils/downloadBlob';
+import { useProcessing } from '../context/ProcessingContext';
 
 const STORAGE_KEY = 'pdfPasswordRemover_data';
 
 export const usePDFPasswordRemover = (processPDF) => {
+  const { isProcessingPDF, setIsProcessingPDF } = useProcessing();
   const [file, setFile] = useState(null);
   const [password, setPassword] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [fileName, setFileName] = useState('');
   const [savePassword, setSavePassword] = useState(true);
 
@@ -38,6 +40,7 @@ export const usePDFPasswordRemover = (processPDF) => {
       setFile(selectedFile);
       setFileName(selectedFile.name);
       setError('');
+      setSuccessMessage('');
     }
   };
 
@@ -85,12 +88,13 @@ export const usePDFPasswordRemover = (processPDF) => {
       return;
     }
 
-    setIsProcessing(true);
+    setIsProcessingPDF(true);
     setError('');
+    setSuccessMessage('');
 
     try {
       // create PDF.js document object with password
-      const pdfDocument = await createPDFBuffer(file, password);
+      const pdfDocument = await createSafeBuffer(file, password);
 
       // convert PDF to new PDF without password
       const newPdf = await processPDF(pdfDocument, password);
@@ -98,9 +102,10 @@ export const usePDFPasswordRemover = (processPDF) => {
       // download the new PDF without password
       downloadBlob(newPdf, fileName);
 
-      setIsProcessing(false);
+      setSuccessMessage(`Password removed successfully! File downloaded: ${fileName}`);
+      setIsProcessingPDF(false);
     } catch (err) {
-      setIsProcessing(false);
+      setIsProcessingPDF(false);
       if (err.message.includes('password') || err.message.includes('PasswordException')) {
         setError('Incorrect password. Please try again.');
       } else {
@@ -112,7 +117,8 @@ export const usePDFPasswordRemover = (processPDF) => {
   return {
     file,
     password,
-    isProcessing,
+    isProcessing: isProcessingPDF,
+    successMessage,
     error,
     fileName,
     savePassword,

@@ -1,4 +1,4 @@
-export const createPDFBuffer = async (file) => {
+export const createSafeBuffer = async (file) => {
   // Create a safe copy of an ArrayBuffer to avoid detached buffer issues
   function copyArrayBuffer(arrayBuffer) {
     try {

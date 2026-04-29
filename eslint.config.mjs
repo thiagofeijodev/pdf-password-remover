@@ -197,6 +197,7 @@ const config = [
       '**/pdf-remover.js',
       '**/test*.{js,ts,mjs}',
       '**/src/wasm/**',
+      '**/src/wasm-heic/**',
     ],
   },
 ];

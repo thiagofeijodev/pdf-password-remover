@@ -3,12 +3,16 @@
  * Tests state management, localStorage interactions, and password handling
  */
 
+import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
+import { ProcessingProvider } from '../context/ProcessingProvider';
 import { usePDFPasswordRemover } from './usePDFPasswordRemover';
 
-// Mock createPDFBuffer
-jest.mock('../utils/createPDFBuffer', () => ({
-  createPDFBuffer: jest.fn(async (file) => {
+const wrapper = ({ children }) => React.createElement(ProcessingProvider, null, children);
+
+// Mock createSafeBuffer
+jest.mock('../utils/createSafeBuffer', () => ({
+  createSafeBuffer: jest.fn(async (file) => {
     return file.arrayBuffer();
   }),
 }));
@@ -19,7 +23,7 @@ jest.mock('../utils/downloadBlob', () => ({
 }));
 
 const mockDownloadBlob = require('../utils/downloadBlob').downloadBlob;
-const mockCreatePDFBuffer = require('../utils/createPDFBuffer').createPDFBuffer;
+const mockCreatePDFBuffer = require('../utils/createSafeBuffer').createSafeBuffer;
 
 describe('usePDFPasswordRemover', () => {
   const mockProcessPDFWithPdfium = jest.fn(async (pdfData, password) => {
@@ -36,7 +40,9 @@ describe('usePDFPasswordRemover', () => {
 
   describe('Initial State', () => {
     it('should initialize with default values', () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       expect(result.current.password).toBe('');
       expect(result.current.isProcessing).toBe(false);
@@ -53,7 +59,7 @@ describe('usePDFPasswordRemover', () => {
         JSON.stringify({ password: encodedPassword }),
       );
 
-      renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), { wrapper });
 
       // Password should be loaded from localStorage
       expect(localStorage.getItem('pdfPasswordRemover_data')).toBe(
@@ -64,7 +70,9 @@ describe('usePDFPasswordRemover', () => {
     it('should handle corrupted localStorage data gracefully', () => {
       localStorage.setItem('pdfPasswordRemover_data', 'corrupted data');
 
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       expect(result.current.password).toBe('');
     });
@@ -72,7 +80,9 @@ describe('usePDFPasswordRemover', () => {
 
   describe('File Input Handling', () => {
     it('should handle file selection', () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       const mockFile = new File(['PDF content'], 'test.pdf', { type: 'application/pdf' });
       const event = {
@@ -89,7 +99,9 @@ describe('usePDFPasswordRemover', () => {
     });
 
     it('should clear error when new file is selected', () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       const mockFile = new File(['PDF content'], 'test.pdf', { type: 'application/pdf' });
       const event = {
@@ -110,7 +122,9 @@ describe('usePDFPasswordRemover', () => {
     });
 
     it('should handle empty file selection', () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       const event = {
         target: { files: [] },
@@ -127,7 +141,9 @@ describe('usePDFPasswordRemover', () => {
 
   describe('Password Input Handling', () => {
     it('should update password state', () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       const event = {
         target: { value: 'testPassword' },
@@ -141,7 +157,9 @@ describe('usePDFPasswordRemover', () => {
     });
 
     it('should clear error when password is changed', () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       const event = {
         target: { value: 'newPassword' },
@@ -155,7 +173,9 @@ describe('usePDFPasswordRemover', () => {
     });
 
     it('should save password to localStorage when savePassword is true', () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       act(() => {
         result.current.handlePasswordChange({
@@ -169,7 +189,9 @@ describe('usePDFPasswordRemover', () => {
     });
 
     it('should not save password when savePassword is false', () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       // Set savePassword to false
       act(() => {
@@ -192,7 +214,9 @@ describe('usePDFPasswordRemover', () => {
 
   describe('Save Password Toggle', () => {
     it('should toggle savePassword state', () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       expect(result.current.savePassword).toBe(true);
 
@@ -206,7 +230,9 @@ describe('usePDFPasswordRemover', () => {
     });
 
     it('should clear password when unchecking savePassword', () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       act(() => {
         result.current.handlePasswordChange({
@@ -226,7 +252,9 @@ describe('usePDFPasswordRemover', () => {
     });
 
     it('should clear localStorage when unchecking savePassword', () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       act(() => {
         result.current.handleSavePasswordChange({
@@ -241,7 +269,9 @@ describe('usePDFPasswordRemover', () => {
 
   describe('Password Removal', () => {
     it('should return error when no file is selected', async () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       act(() => {
         result.current.handlePasswordChange({
@@ -257,7 +287,9 @@ describe('usePDFPasswordRemover', () => {
     });
 
     it('should return error when no password is entered', async () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       const mockFile = new File(['PDF'], 'test.pdf');
 
@@ -277,7 +309,9 @@ describe('usePDFPasswordRemover', () => {
     it('should process PDF when file and password are provided', async () => {
       mockCreatePDFBuffer.mockResolvedValue(new ArrayBuffer(10));
 
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       const mockFile = new File(['PDF content'], 'test.pdf');
 
@@ -308,7 +342,9 @@ describe('usePDFPasswordRemover', () => {
           }),
       );
 
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       const mockFile = new File(['PDF'], 'test.pdf');
 
@@ -334,7 +370,9 @@ describe('usePDFPasswordRemover', () => {
     it('should handle processing errors', async () => {
       mockCreatePDFBuffer.mockRejectedValue(new Error('File read error'));
 
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       const mockFile = new File(['PDF'], 'test.pdf');
 
@@ -358,7 +396,9 @@ describe('usePDFPasswordRemover', () => {
 
   describe('localStorage Integration', () => {
     it('should encode password before saving to localStorage', () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       act(() => {
         result.current.handlePasswordChange({
@@ -371,7 +411,9 @@ describe('usePDFPasswordRemover', () => {
     });
 
     it('should handle localStorage errors gracefully', () => {
-      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium));
+      const { result } = renderHook(() => usePDFPasswordRemover(mockProcessPDFWithPdfium), {
+        wrapper,
+      });
 
       expect(() => {
         act(() => {

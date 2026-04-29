@@ -7,6 +7,8 @@ import { rustPdfRemover, initWasm } from '../utils/rustPdfRemover';
 export const useRustPDFRemover = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isReady, setIsReady] = useState(false);
+  const [progress, setProgress] = useState(null);
+  const [progressStage, setProgressStage] = useState(null);
 
   useEffect(() => {
     const init = async () => {
@@ -31,7 +33,14 @@ export const useRustPDFRemover = () => {
   const processPDFWithRust = async (pdfData, password) => {
     try {
       console.log('[Hook] Starting PDF processing with Rust WASM');
-      const blob = await rustPdfRemover(pdfData, password);
+      setProgress(null);
+      setProgressStage('starting');
+      const onProgress = (msg) => {
+        setProgress(msg.percent ?? null);
+        setProgressStage(msg.stage ?? null);
+      };
+      const blob = await rustPdfRemover(pdfData, password, { onProgress });
+      setProgressStage('done');
       console.log('[Hook] Processing successful');
       return blob;
     } catch (err) {
@@ -44,5 +53,7 @@ export const useRustPDFRemover = () => {
     isLoading,
     processPDFWithRust,
     isReady,
+    progress,
+    progressStage,
   };
 };

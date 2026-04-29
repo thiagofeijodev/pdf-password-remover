@@ -6,7 +6,9 @@
 /dist
 /build
 /src/wasm
+/src/wasm-heic
 /rust-pdf-remover/target
+/rust-heic-converter/target
 
 # testing
 /coverage
