@@ -125,7 +125,7 @@ Notes:
 
 The GitHub Actions workflow is in `.github/workflows/main.yml` and runs on pushes to `main`. Key steps:
 
-- Setup Node (Node 24) and cache `npm`
+- Setup Node (Node 24)
 - Install `wasm-pack` (installer script)
 - `npm ci`
 - `npm run build:wasm`
